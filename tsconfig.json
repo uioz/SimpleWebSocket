@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "ES6",
+        "outDir": "./dist",
+        "typeRoots": [
+            "./node_modules/@types"
+        ],
+        "watch": true,
+        "sourceMap": false,
+        "lib": [
+            "es5",
+            "es6",
+            "es7"
+        ]
+    },
+    "files": [
+        "./src/server.ts",
+        "./src/client.ts"
+    ]
+}

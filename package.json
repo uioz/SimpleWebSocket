@@ -4,17 +4,20 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "buildServer": "tsc -p ./tsconfig.json",
+    "start": "node ./dist/server.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "socket.io": "^2.1.1",
-    "vue": "^2.5.17"
+    "vue": "^2.5.17",
+    "ws": "^6.1.0"
   },
   "devDependencies": {
     "@types/node": "^10.12.2",
     "@types/socket.io": "^2.1.0",
+    "@types/ws": "^6.0.1",
     "typescript": "^3.1.6"
   }
 }
