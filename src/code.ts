@@ -2,14 +2,29 @@
 /**
  * 定义服务端的错误信息
  */
-export enum errorCode {
-    '请求参数错误' = 10,
+export enum ErrorCode {
+    'system:请求参数错误' = 10,
     'login:该昵称已经有人使用' = 11,
     'login:类型请求缺少必要的参数' = 12,
     'message:类型请求参数错误' = 13,
     'message:类型请求缺少必要参数' = 14,
     'system:用户不存在' = 100,
+    'error:数据格式化错误' = 200,
+    'error:没有对应的检测器' = 201,
+    'error:数据校检错误' = 202
 };
+
+/**
+ * 定义了响应错误码对应的错误类型
+ */
+export const ErrorType = {
+    10:'system',
+    11:'login',
+    12:'login',
+    13:'message',
+    14:'message',
+    100:'system'
+}
 
 /**
  * 定义连接状态描述符号

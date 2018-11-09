@@ -1,13 +1,18 @@
 import * as webSocket from "ws";
-import { userCollection, userNickNameCollection } from "./userCollection";
 import {
     routeI,
     requestLoginType,
+    requestMessageType,
     loginResponse,
+    messageResponse,
+    broadCastLoginResponse,
+    broadCastMessageResponse
 } from "./types";
+import { addUser } from "./dataPersistence";
 import { checkAndFormat } from "./verification";
-import { closeProcess } from "./public";
+import { closeProcess, broadcast } from "./public";
 
+// TODO Date格式化
 
 /**
  * 路由
@@ -15,21 +20,54 @@ import { closeProcess } from "./public";
 const route: routeI = {
     login: (ws: webSocket, request: requestLoginType) => {
 
-        const time = Date.now().toString(32),
-            nickName = request.nickName,
-            id = nickName + time;
+        const
+            time = Date.now(),
+            auth = time.toString(32),
+            nickName = request.nickName;
 
-        userCollection.set(id, ws);
-        userNickNameCollection.set(nickName, id);
-        (ws as any).nickName = nickName;
+        addUser(nickName, auth, ws);
+
+        const broadCastResponse: broadCastLoginResponse = {
+            type: 'broadCastLogin',
+            result: {
+                userName: nickName,
+                message: time.toString()
+            }
+        };
+
+        broadcast(nickName, broadCastResponse);
 
         const response: loginResponse = {
             type: 'login',
             result: true,
-            auth:time
+            auth: auth
         };
 
         ws.send(JSON.stringify(response));
+    },
+    message: (ws: webSocket, request: requestMessageType) => {
+
+        const
+            nickName = request.nickName,
+            message = request.message;
+
+        const broadCastResponse: broadCastMessageResponse = {
+            type: 'broadCast',
+            result: {
+                userName: nickName,
+                message:message
+            }
+        };
+
+        broadcast(nickName,broadCastResponse);
+        
+        const response: messageResponse = {
+            type: 'message',
+            result: true
+        };
+
+        ws.send(JSON.stringify(response));
+
     }
 };
 
@@ -54,13 +92,13 @@ export function router(ws: webSocket) {
             return route[result.type](ws, result);
         }
 
-        return ws.close();
+        return ws.terminate();
 
     });
 
     closeProcess.bind(ws);
 
-    ws.once('error',closeProcess);
-    ws.once('close',closeProcess);
+    ws.once('error', closeProcess);
+    ws.once('close', closeProcess);
 
 };

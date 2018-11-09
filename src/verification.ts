@@ -1,7 +1,7 @@
 import { routeParamCheckI, requestLoginType, requestMessageType,standardRequest } from "./types";
-import { userNickNameCollection, userCollection } from "./userCollection";
-import { errorCode } from "./code";
-import { sendErrorMessage, dataCompare as Compare } from "./public";
+import { hasUser } from "./dataPersistence";
+import { ErrorCode } from "./code";
+import { sendErrorMessage, dataCompare as Compare,logError } from "./public";
 import * as webSocket from "ws";
 
 const dataCompare = new Compare();
@@ -10,7 +10,6 @@ dataCompare.setStandardCompare('login',{
     type:'string',
     nickName:'string'
 });
-
 dataCompare.setStandardCompare('message',{
     type:'string',
     nickName:'string',
@@ -29,8 +28,8 @@ export const paramCheck: routeParamCheckI = {
 
         if(!compareStateCode){
             
-            if (userNickNameCollection.has(request.nickName)) {
-                return errorCode['login:该昵称已经有人使用'];
+            if(hasUser(request.nickName)){
+                return ErrorCode['login:该昵称已经有人使用'];
             }
 
             return true;
@@ -38,23 +37,23 @@ export const paramCheck: routeParamCheckI = {
         }
 
         if(compareStateCode == 1){
-            return errorCode['login:类型请求缺少必要的参数'];
+            return ErrorCode['login:类型请求缺少必要的参数'];
         }else{
-            return errorCode['请求参数错误'];
+            return ErrorCode['system:请求参数错误'];
         }
 
     },
-    messsage(request: requestMessageType) {
+    message(request: requestMessageType) {
 
         // 获取状态码
-        const compareStateCode = dataCompare.compare('login', request);
+        const compareStateCode = dataCompare.compare('message', request);
 
         if(!compareStateCode){
 
             const userId = request.nickName+request.auth;
 
-            if(!userCollection.has(userId)){
-                return errorCode['system:用户不存在'];
+            if(!hasUser(request.nickName)){
+                return ErrorCode['system:用户不存在'];
             }
 
             return true;
@@ -62,9 +61,9 @@ export const paramCheck: routeParamCheckI = {
         }
 
         if (compareStateCode == 1) {
-            return errorCode['message:类型请求缺少必要参数'];
+            return ErrorCode['message:类型请求缺少必要参数'];
         } else {
-            return errorCode['message:类型请求参数错误'];
+            return ErrorCode['message:类型请求参数错误'];
         }
 
     }
@@ -82,7 +81,7 @@ export function formatUserData(userData: string): standardRequest | number {
         const result: standardRequest = JSON.parse(userData);
 
         if (typeof result != 'object' || Array.isArray(result) || !result.type) {
-            throw errorCode['请求参数错误'];
+            throw ErrorCode['system:请求参数错误'];
         }
 
         return result;
@@ -92,7 +91,7 @@ export function formatUserData(userData: string): standardRequest | number {
         return error;
 
     }
-    
+
 };
 
 /**
@@ -111,12 +110,14 @@ export function checkAndFormat(ws: webSocket, data: string): standardRequest | f
     // 返回错误码
     if (typeof requestParam == 'number') {
         sendErrorMessage(ws, requestParam);
+        logError(ErrorCode['error:数据格式化错误'],data);
         return false;
     }
 
     // 如果没有对应的检测器
     if (!paramCheck[requestType]) {
-        sendErrorMessage(ws, errorCode['请求参数错误']);
+        sendErrorMessage(ws, ErrorCode['system:请求参数错误']);
+        logError(ErrorCode['error:没有对应的检测器'], data);
         return false;
     }
 
@@ -126,6 +127,7 @@ export function checkAndFormat(ws: webSocket, data: string): standardRequest | f
     // 返回错误码
     if (typeof requestCheckResult == 'number') {
         sendErrorMessage(ws, requestCheckResult);
+        logError(ErrorCode['error:数据校检错误'], data);
         return false;
     }
 

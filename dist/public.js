@@ -1,24 +1,50 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const code_1 = require("./code");
-const userCollection_1 = require("./userCollection");
+const dataPersistence_1 = require("./dataPersistence");
 const util_1 = require("util");
-function bordcast() {
+// TODO logout
+/**
+ * 向除了该用户的所有在线的用户广播消息
+ * @param nickName 用户昵称
+ * @param data 发送的数据
+ */
+function broadcast(nickName, data) {
+    const sockets = dataPersistence_1.getLiveSockets('nickName');
+    for (const socket of sockets) {
+        socket.send(JSON.stringify(data));
+    }
 }
-exports.bordcast = bordcast;
+exports.broadcast = broadcast;
+;
+/**
+ * 向系统或者控制台打印或者输出
+ * @param errorCode 错误代码
+ * @param data 输出的数据
+ */
+function logError(errorCode, data) {
+    console.log('连接错误原因:', code_1.ErrorCode[errorCode], '|', '用户连接源数据:', data);
+}
+exports.logError = logError;
+;
 /**
  * 发送自定义的错误信息
  * @param ws socket对象
  * @param errorCode 错误代码
  */
 function sendErrorMessage(ws, errorcode) {
+    const errorType = code_1.ErrorType[errorcode] ? code_1.ErrorType[errorcode] : 'system';
     const response = {
-        type: 'login',
+        type: errorType,
         result: false,
-        error: code_1.errorCode[errorcode]
+        error: code_1.ErrorCode[errorcode]
     };
-    console.log('响应错误:errorCode', errorcode, '错误详细内容:', code_1.errorCode[errorcode], '错误结果:', response);
-    ws.send(JSON.stringify(response));
+    console.log(ws.nickName ? `用户昵称:${ws.nickName} |` : `未登录连接 |`, 'errorCode:', errorcode, '错误详细内容:', code_1.ErrorCode[errorcode], '错误结果:', response);
+    try {
+        ws.send(JSON.stringify(response));
+    }
+    catch (error) {
+    }
 }
 exports.sendErrorMessage = sendErrorMessage;
 ;
@@ -31,14 +57,11 @@ function closeProcess(errorOrcloseCode, closeCodeReason) {
     this.removeAllListeners();
     const nickName = this.nickName;
     if (nickName) {
-        // 清除信息
-        const userId = userCollection_1.userNickNameCollection.get(nickName);
-        userCollection_1.userNickNameCollection.delete(nickName);
-        userCollection_1.userCollection.delete(userId);
+        dataPersistence_1.removeUser(nickName);
         // 此处广播离线
-        return console.log(typeof errorOrcloseCode == 'object' ? '己连接用户错误-错误信息:' : '己连接用户关闭-关闭代码', errorOrcloseCode);
+        return console.log(typeof errorOrcloseCode == 'object' ? '己连接用户错误-错误信息:' : '己连接用户关闭-关闭代码', errorOrcloseCode, '\n');
     }
-    return console.log(typeof errorOrcloseCode == 'object' ? '未连接用户错误-错误信息:' : '未连接用户关闭-关闭代码', errorOrcloseCode);
+    return console.log(typeof errorOrcloseCode == 'object' ? '未连接用户错误-错误信息:' : '未连接用户关闭-关闭代码', errorOrcloseCode, '\n');
 }
 exports.closeProcess = closeProcess;
 ;

@@ -1,21 +1,44 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const userCollection_1 = require("./userCollection");
+const dataPersistence_1 = require("./dataPersistence");
 const verification_1 = require("./verification");
 const public_1 = require("./public");
+// TODO Date格式化
 /**
  * 路由
  */
 const route = {
     login: (ws, request) => {
-        const time = Date.now().toString(32), nickName = request.nickName, id = nickName + time;
-        userCollection_1.userCollection.set(id, ws);
-        userCollection_1.userNickNameCollection.set(nickName, id);
-        ws.nickName = nickName;
+        const time = Date.now(), auth = time.toString(32), nickName = request.nickName;
+        dataPersistence_1.addUser(nickName, auth, ws);
+        const broadCastResponse = {
+            type: 'broadCastLogin',
+            result: {
+                userName: nickName,
+                message: time.toString()
+            }
+        };
+        public_1.broadcast(nickName, broadCastResponse);
         const response = {
             type: 'login',
             result: true,
-            auth: time
+            auth: auth
+        };
+        ws.send(JSON.stringify(response));
+    },
+    message: (ws, request) => {
+        const nickName = request.nickName, message = request.message;
+        const broadCastResponse = {
+            type: 'broadCast',
+            result: {
+                userName: nickName,
+                message: message
+            }
+        };
+        public_1.broadcast(nickName, broadCastResponse);
+        const response = {
+            type: 'message',
+            result: true
         };
         ws.send(JSON.stringify(response));
     }
@@ -37,7 +60,7 @@ function router(ws) {
         if (result) {
             return route[result.type](ws, result);
         }
-        return ws.close();
+        return ws.terminate();
     });
     public_1.closeProcess.bind(ws);
     ws.once('error', public_1.closeProcess);

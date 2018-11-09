@@ -1,0 +1,22 @@
+[
+	{
+		"path": "$ROOTPATH$\\src\\router.ts",
+		"bookmarks": [
+			{
+				"line": 14,
+				"column": 15,
+				"label": ""
+			}
+		]
+	},
+	{
+		"path": "$ROOTPATH$\\src\\public.ts",
+		"bookmarks": [
+			{
+				"line": 6,
+				"column": 14,
+				"label": ""
+			}
+		]
+	}
+]

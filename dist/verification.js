@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const userCollection_1 = require("./userCollection");
+const dataPersistence_1 = require("./dataPersistence");
 const code_1 = require("./code");
 const public_1 = require("./public");
 const dataCompare = new public_1.dataCompare();
@@ -22,33 +22,33 @@ exports.paramCheck = {
         // 获取状态码
         const compareStateCode = dataCompare.compare('login', request);
         if (!compareStateCode) {
-            if (userCollection_1.userNickNameCollection.has(request.nickName)) {
-                return code_1.errorCode['login:该昵称已经有人使用'];
+            if (dataPersistence_1.hasUser(request.nickName)) {
+                return code_1.ErrorCode['login:该昵称已经有人使用'];
             }
             return true;
         }
         if (compareStateCode == 1) {
-            return code_1.errorCode['login:类型请求缺少必要的参数'];
+            return code_1.ErrorCode['login:类型请求缺少必要的参数'];
         }
         else {
-            return code_1.errorCode['请求参数错误'];
+            return code_1.ErrorCode['system:请求参数错误'];
         }
     },
-    messsage(request) {
+    message(request) {
         // 获取状态码
-        const compareStateCode = dataCompare.compare('login', request);
+        const compareStateCode = dataCompare.compare('message', request);
         if (!compareStateCode) {
             const userId = request.nickName + request.auth;
-            if (!userCollection_1.userCollection.has(userId)) {
-                return code_1.errorCode['system:用户不存在'];
+            if (!dataPersistence_1.hasUser(request.nickName)) {
+                return code_1.ErrorCode['system:用户不存在'];
             }
             return true;
         }
         if (compareStateCode == 1) {
-            return code_1.errorCode['message:类型请求缺少必要参数'];
+            return code_1.ErrorCode['message:类型请求缺少必要参数'];
         }
         else {
-            return code_1.errorCode['message:类型请求参数错误'];
+            return code_1.ErrorCode['message:类型请求参数错误'];
         }
     }
 };
@@ -60,7 +60,7 @@ function formatUserData(userData) {
     try {
         const result = JSON.parse(userData);
         if (typeof result != 'object' || Array.isArray(result) || !result.type) {
-            throw code_1.errorCode['请求参数错误'];
+            throw code_1.ErrorCode['system:请求参数错误'];
         }
         return result;
     }
@@ -83,11 +83,13 @@ function checkAndFormat(ws, data) {
     // 返回错误码
     if (typeof requestParam == 'number') {
         public_1.sendErrorMessage(ws, requestParam);
+        public_1.logError(code_1.ErrorCode['error:数据格式化错误'], data);
         return false;
     }
     // 如果没有对应的检测器
     if (!exports.paramCheck[requestType]) {
-        public_1.sendErrorMessage(ws, code_1.errorCode['请求参数错误']);
+        public_1.sendErrorMessage(ws, code_1.ErrorCode['system:请求参数错误']);
+        public_1.logError(code_1.ErrorCode['error:没有对应的检测器'], data);
         return false;
     }
     // 获取校验结果 
@@ -95,6 +97,7 @@ function checkAndFormat(ws, data) {
     // 返回错误码
     if (typeof requestCheckResult == 'number') {
         public_1.sendErrorMessage(ws, requestCheckResult);
+        public_1.logError(code_1.ErrorCode['error:数据校检错误'], data);
         return false;
     }
     // 返回格式化合校检后的请求对象

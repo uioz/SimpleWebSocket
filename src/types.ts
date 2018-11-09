@@ -61,3 +61,49 @@ export interface loginResponse extends standardResponse {
 export interface messageResponse extends standardResponse {
     type:'message';
 }
+
+// ---------------------- 广播响应类型
+
+/**
+ * 定义标准的广播接口
+ */
+export interface standardBroadCastResponse {
+    type:string;
+    result:{
+        userName: string;
+        message: string;
+    }
+}
+
+/**
+ * 定义广播消息的接口
+ */
+export interface broadCastMessageResponse extends standardBroadCastResponse {
+    type:'broadCast';
+    result:{
+        userName:string;
+        message:string;
+    }
+}
+
+/**
+ * 定义广播用户登录的接口
+ */
+export interface broadCastLoginResponse extends standardBroadCastResponse {
+    type:'broadCastLogin';
+    result:{
+        userName:string;
+        message:string;
+    }
+}
+
+/**
+ * 定义广播用户注销的接口
+ */
+export interface broadCastLogoutResponse extends standardBroadCastResponse {
+    type: 'broadCastLogout';
+    result: {
+        userName: string;
+        message: string;
+    }
+}

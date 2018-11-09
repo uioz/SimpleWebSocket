@@ -1,12 +1,36 @@
 import * as webSocket from "ws";
-import { standardErrorResponse } from "./types";
-import { errorCode } from "./code";
-import { userCollection, userNickNameCollection } from "./userCollection";
-import { isString, isBoolean, isObject, isArray, isNull, isNumber } from "util";
+import { standardErrorResponse, standardBroadCastResponse } from "./types";
+import { ErrorCode, ErrorType } from "./code";
+import { removeUser, getLiveSockets } from "./dataPersistence";
+import { isString, isBoolean, isObject, isArray, isNumber } from "util";
 
-export function bordcast() {
+// TODO logout
 
-}
+/**
+ * 向除了该用户的所有在线的用户广播消息
+ * @param nickName 用户昵称
+ * @param data 发送的数据
+ */
+export function broadcast(nickName: string, data: standardBroadCastResponse):void {
+
+    const sockets = getLiveSockets('nickName');
+
+    for (const socket of sockets) {
+
+        socket.send(JSON.stringify(data));
+
+    }
+
+};
+
+/**
+ * 向系统或者控制台打印或者输出
+ * @param errorCode 错误代码
+ * @param data 输出的数据
+ */
+export function logError(errorCode: number, data: any) {
+    console.log('连接错误原因:', ErrorCode[errorCode], '|', '用户连接源数据:', data);
+};
 
 /**
  * 发送自定义的错误信息
@@ -15,16 +39,21 @@ export function bordcast() {
  */
 export function sendErrorMessage(ws: webSocket, errorcode: number) {
 
+    const errorType = ErrorType[errorcode] ? ErrorType[errorcode] : 'system';
 
     const response: standardErrorResponse = {
-        type: 'login',
+        type: errorType,
         result: false,
-        error: errorCode[errorcode]
+        error: ErrorCode[errorcode]
     };
 
-    console.log('响应错误:errorCode', errorcode, '错误详细内容:', errorCode[errorcode], '错误结果:', response);
+    console.log((ws as any).nickName ? `用户昵称:${(ws as any).nickName} |` : `未登录连接 |`, 'errorCode:', errorcode, '错误详细内容:', ErrorCode[errorcode], '错误结果:', response);
 
-    ws.send(JSON.stringify(response));
+    try {
+        ws.send(JSON.stringify(response));
+    } catch (error) {
+
+    }
 };
 
 /**
@@ -40,17 +69,14 @@ export function closeProcess(this: webSocket, errorOrcloseCode: object | number,
 
     if (nickName) {
 
-        // 清除信息
-        const userId = userNickNameCollection.get(nickName);
-        userNickNameCollection.delete(nickName);
-        userCollection.delete(userId);
+        removeUser(nickName);
 
         // 此处广播离线
-        return console.log(typeof errorOrcloseCode == 'object' ? '己连接用户错误-错误信息:' : '己连接用户关闭-关闭代码', errorOrcloseCode);
+        return console.log(typeof errorOrcloseCode == 'object' ? '己连接用户错误-错误信息:' : '己连接用户关闭-关闭代码', errorOrcloseCode, '\n');
 
     }
 
-    return console.log(typeof errorOrcloseCode == 'object' ? '未连接用户错误-错误信息:' : '未连接用户关闭-关闭代码', errorOrcloseCode);
+    return console.log(typeof errorOrcloseCode == 'object' ? '未连接用户错误-错误信息:' : '未连接用户关闭-关闭代码', errorOrcloseCode, '\n');
 
 };
 
@@ -142,7 +168,7 @@ export class dataCompare {
      */
     public compare(name: string, data: object): number {
 
-        if(!isObject(data)){
+        if (!isObject(data)) {
             return dataCompare.StateCode['参数不是对象'];
         }
 
