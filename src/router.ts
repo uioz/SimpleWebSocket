@@ -21,17 +21,20 @@ const route: routeI = {
     login: (ws: webSocket, request: requestLoginType) => {
 
         const
-            time = Date.now(),
-            auth = time.toString(32),
+            time = new Date(),
+            auth = time.getTime().toString(32),
             nickName = request.nickName;
 
         addUser(nickName, auth, ws);
+
+        // 向socket挂载昵称
+        (ws as any).nickName = nickName
 
         const broadCastResponse: broadCastLoginResponse = {
             type: 'broadCastLogin',
             result: {
                 userName: nickName,
-                message: time.toString()
+                time: time.toLocaleString(),
             }
         };
 
@@ -55,6 +58,7 @@ const route: routeI = {
             type: 'broadCast',
             result: {
                 userName: nickName,
+                time:new Date().toLocaleString(),
                 message:message
             }
         };

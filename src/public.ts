@@ -1,10 +1,9 @@
 import * as webSocket from "ws";
-import { standardErrorResponse, standardBroadCastResponse } from "./types";
+import { standardErrorResponse, standardBroadCastResponse,broadCastLogoutResponse } from "./types";
 import { ErrorCode, ErrorType } from "./code";
-import { removeUser, getLiveSockets } from "./dataPersistence";
+import { removeUser, getLiveSockets,hasUser } from "./dataPersistence";
 import { isString, isBoolean, isObject, isArray, isNumber } from "util";
 
-// TODO logout
 
 /**
  * 向除了该用户的所有在线的用户广播消息
@@ -28,8 +27,13 @@ export function broadcast(nickName: string, data: standardBroadCastResponse):voi
  * @param errorCode 错误代码
  * @param data 输出的数据
  */
-export function logError(errorCode: number, data: any) {
-    console.log('连接错误原因:', ErrorCode[errorCode], '|', '用户连接源数据:', data);
+export function logError(errorCode: number, data: any):void {
+
+    console.log('\n','----------logError----------');
+    console.log('连接错误原因:', ErrorCode[errorCode],'\n','用户连接源数据:', data);
+    console.log('----------logErrorEnd----------', '\n');
+
+
 };
 
 /**
@@ -37,7 +41,7 @@ export function logError(errorCode: number, data: any) {
  * @param ws socket对象
  * @param errorCode 错误代码
  */
-export function sendErrorMessage(ws: webSocket, errorcode: number) {
+export function sendErrorMessage(ws: webSocket, errorcode: number):void {
 
     const errorType = ErrorType[errorcode] ? ErrorType[errorcode] : 'system';
 
@@ -47,7 +51,9 @@ export function sendErrorMessage(ws: webSocket, errorcode: number) {
         error: ErrorCode[errorcode]
     };
 
-    console.log((ws as any).nickName ? `用户昵称:${(ws as any).nickName} |` : `未登录连接 |`, 'errorCode:', errorcode, '错误详细内容:', ErrorCode[errorcode], '错误结果:', response);
+    console.log('\n','-------------sendErrorMessage------------');
+    console.log('连接类型: ',(ws as any).nickName ? `登录用户-昵称:${(ws as any).nickName}` : `未登录用户`,'\n', 'errorCode:', errorcode,'\n','错误详细内容:', ErrorCode[errorcode],'\n','错误结果:', response);
+    console.log( '------------sendErrorMessageEnd-----------', '\n');
 
     try {
         ws.send(JSON.stringify(response));
@@ -67,17 +73,31 @@ export function closeProcess(this: webSocket, errorOrcloseCode: object | number,
 
     const nickName: string = (this as any).nickName;
 
-    if (nickName) {
+    if (hasUser(nickName)) {
 
         removeUser(nickName);
 
-        // 此处广播离线
-        return console.log(typeof errorOrcloseCode == 'object' ? '己连接用户错误-错误信息:' : '己连接用户关闭-关闭代码', errorOrcloseCode, '\n');
+        const response: broadCastLogoutResponse = {
+            type:'broadCastLogout',
+            result:{
+                userName:nickName,
+                time:new Date().toLocaleString()
+            }
+        };
 
+        broadcast(nickName,response);
+
+        console.log('\n','---------------closeAndErrorProcess--------------');
+        console.log(typeof errorOrcloseCode == 'object' ? `昵称:${nickName}连接错误:` : `昵称:${nickName}通信关闭-关闭代码`, errorOrcloseCode, '\n');
+        console.log( '-------------closeAndErrorProcessEnd------------', '\n');
+        return ;
     }
 
-    return console.log(typeof errorOrcloseCode == 'object' ? '未连接用户错误-错误信息:' : '未连接用户关闭-关闭代码', errorOrcloseCode, '\n');
+    console.log('\n', '---------------closeAndErrorProcess--------------');
+    console.log(typeof errorOrcloseCode == 'object' ? `非法用户连接错误:` : `非法用户通信关闭-关闭代码`, errorOrcloseCode);
+    console.log('----------------closeAndErrorProcessEnd------------', '\n');
 
+    return ;
 };
 
 type canCompareType = 'string' | 'number' | 'boolean' | 'object' | 'array';
@@ -89,7 +109,7 @@ enum compareStateCode {
     '参数键名不对' = 3,
     '参数类型不匹配' = 4,
     '参数不是对象' = 5,
-}
+};
 
 /**
  * 用于比较对象是否符合相应的格式

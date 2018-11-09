@@ -47,7 +47,7 @@ export function removeUser(nickName: string): boolean {
 
     userNickNameCollection.delete(nickName);
     userCollection.delete(userId);
-
+    
     return true;
 
 }

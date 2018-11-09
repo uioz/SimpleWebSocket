@@ -8,15 +8,5 @@
 				"label": ""
 			}
 		]
-	},
-	{
-		"path": "$ROOTPATH$\\src\\public.ts",
-		"bookmarks": [
-			{
-				"line": 6,
-				"column": 14,
-				"label": ""
-			}
-		]
 	}
 ]

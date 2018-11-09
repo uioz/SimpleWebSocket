@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const code_1 = require("./code");
 const dataPersistence_1 = require("./dataPersistence");
 const util_1 = require("util");
-// TODO logout
 /**
  * 向除了该用户的所有在线的用户广播消息
  * @param nickName 用户昵称
@@ -23,7 +22,9 @@ exports.broadcast = broadcast;
  * @param data 输出的数据
  */
 function logError(errorCode, data) {
-    console.log('连接错误原因:', code_1.ErrorCode[errorCode], '|', '用户连接源数据:', data);
+    console.log('\n', '----------logError----------');
+    console.log('连接错误原因:', code_1.ErrorCode[errorCode], '\n', '用户连接源数据:', data);
+    console.log('----------logErrorEnd----------', '\n');
 }
 exports.logError = logError;
 ;
@@ -39,7 +40,9 @@ function sendErrorMessage(ws, errorcode) {
         result: false,
         error: code_1.ErrorCode[errorcode]
     };
-    console.log(ws.nickName ? `用户昵称:${ws.nickName} |` : `未登录连接 |`, 'errorCode:', errorcode, '错误详细内容:', code_1.ErrorCode[errorcode], '错误结果:', response);
+    console.log('\n', '-------------sendErrorMessage------------');
+    console.log('连接类型: ', ws.nickName ? `登录用户-昵称:${ws.nickName}` : `未登录用户`, '\n', 'errorCode:', errorcode, '\n', '错误详细内容:', code_1.ErrorCode[errorcode], '\n', '错误结果:', response);
+    console.log('------------sendErrorMessageEnd-----------', '\n');
     try {
         ws.send(JSON.stringify(response));
     }
@@ -56,12 +59,25 @@ exports.sendErrorMessage = sendErrorMessage;
 function closeProcess(errorOrcloseCode, closeCodeReason) {
     this.removeAllListeners();
     const nickName = this.nickName;
-    if (nickName) {
+    if (dataPersistence_1.hasUser(nickName)) {
         dataPersistence_1.removeUser(nickName);
-        // 此处广播离线
-        return console.log(typeof errorOrcloseCode == 'object' ? '己连接用户错误-错误信息:' : '己连接用户关闭-关闭代码', errorOrcloseCode, '\n');
+        const response = {
+            type: 'broadCastLogout',
+            result: {
+                userName: nickName,
+                time: new Date().toLocaleString()
+            }
+        };
+        broadcast(nickName, response);
+        console.log('\n', '---------------closeAndErrorProcess--------------');
+        console.log(typeof errorOrcloseCode == 'object' ? `昵称:${nickName}连接错误:` : `昵称:${nickName}通信关闭-关闭代码`, errorOrcloseCode, '\n');
+        console.log('-------------closeAndErrorProcessEnd------------', '\n');
+        return;
     }
-    return console.log(typeof errorOrcloseCode == 'object' ? '未连接用户错误-错误信息:' : '未连接用户关闭-关闭代码', errorOrcloseCode, '\n');
+    console.log('\n', '---------------closeAndErrorProcess--------------');
+    console.log(typeof errorOrcloseCode == 'object' ? `非法用户连接错误:` : `非法用户通信关闭-关闭代码`, errorOrcloseCode);
+    console.log('----------------closeAndErrorProcessEnd------------', '\n');
+    return;
 }
 exports.closeProcess = closeProcess;
 ;
@@ -74,6 +90,7 @@ var compareStateCode;
     compareStateCode[compareStateCode["\u53C2\u6570\u7C7B\u578B\u4E0D\u5339\u914D"] = 4] = "\u53C2\u6570\u7C7B\u578B\u4E0D\u5339\u914D";
     compareStateCode[compareStateCode["\u53C2\u6570\u4E0D\u662F\u5BF9\u8C61"] = 5] = "\u53C2\u6570\u4E0D\u662F\u5BF9\u8C61";
 })(compareStateCode || (compareStateCode = {}));
+;
 /**
  * 用于比较对象是否符合相应的格式
  */

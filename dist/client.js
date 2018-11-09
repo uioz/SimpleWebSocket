@@ -6,13 +6,14 @@ let flag = 1;
 ws.on('open', () => {
     ws.send(JSON.stringify({
         type: 'login',
-        nickName: 'hello world',
-        whatehfuck: 'ewar'
+        nickName: 'hello world'
     }));
 });
 ws.on('message', (data) => {
-    data = JSON.parse(data);
-    console.log('接收到的数据', data);
+    // data = JSON.parse(data);
+    // console.log('接收到的数据',data);
+    console.log('response', data);
+    // TODO 修复broadCastLogin的向自身发送消息的bug
     if (flag) {
         const resposne = JSON.stringify({
             type: 'message',
@@ -20,7 +21,6 @@ ws.on('message', (data) => {
             auth: data.auth,
             message: 'whatthefuck'
         });
-        console.log('response', resposne);
         ws.send(resposne);
         flag = 0;
     }

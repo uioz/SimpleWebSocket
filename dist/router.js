@@ -9,13 +9,15 @@ const public_1 = require("./public");
  */
 const route = {
     login: (ws, request) => {
-        const time = Date.now(), auth = time.toString(32), nickName = request.nickName;
+        const time = new Date(), auth = time.getTime().toString(32), nickName = request.nickName;
         dataPersistence_1.addUser(nickName, auth, ws);
+        // 向socket挂载昵称
+        ws.nickName = nickName;
         const broadCastResponse = {
             type: 'broadCastLogin',
             result: {
                 userName: nickName,
-                message: time.toString()
+                time: time.toLocaleString(),
             }
         };
         public_1.broadcast(nickName, broadCastResponse);
@@ -32,6 +34,7 @@ const route = {
             type: 'broadCast',
             result: {
                 userName: nickName,
+                time: new Date().toLocaleString(),
                 message: message
             }
         };

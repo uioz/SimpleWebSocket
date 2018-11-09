@@ -71,7 +71,7 @@ export interface standardBroadCastResponse {
     type:string;
     result:{
         userName: string;
-        message: string;
+        time: string;
     }
 }
 
@@ -80,9 +80,10 @@ export interface standardBroadCastResponse {
  */
 export interface broadCastMessageResponse extends standardBroadCastResponse {
     type:'broadCast';
-    result:{
-        userName:string;
+    result: {
+        userName: string;
         message:string;
+        time: string;
     }
 }
 
@@ -91,10 +92,6 @@ export interface broadCastMessageResponse extends standardBroadCastResponse {
  */
 export interface broadCastLoginResponse extends standardBroadCastResponse {
     type:'broadCastLogin';
-    result:{
-        userName:string;
-        message:string;
-    }
 }
 
 /**
@@ -102,8 +99,4 @@ export interface broadCastLoginResponse extends standardBroadCastResponse {
  */
 export interface broadCastLogoutResponse extends standardBroadCastResponse {
     type: 'broadCastLogout';
-    result: {
-        userName: string;
-        message: string;
-    }
 }
