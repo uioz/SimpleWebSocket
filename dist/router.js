@@ -20,6 +20,17 @@ const route = {
         ws.send(JSON.stringify(response));
     }
 };
+/**
+ * route的逻辑相当简单.
+ *
+ * 校验用户传入的参数是否符合规定的格式.
+ *
+ * 如果不符合就发送对应的不符合的消息,然后中断连接.
+ *
+ * 如果非法连接就直接中断.
+ *
+ * @param ws webSocket对象
+ */
 function router(ws) {
     ws.on('message', (data) => {
         const result = verification_1.checkAndFormat(ws, data);

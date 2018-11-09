@@ -8,6 +8,9 @@ var errorCode;
     errorCode[errorCode["\u8BF7\u6C42\u53C2\u6570\u9519\u8BEF"] = 10] = "\u8BF7\u6C42\u53C2\u6570\u9519\u8BEF";
     errorCode[errorCode["login:\u8BE5\u6635\u79F0\u5DF2\u7ECF\u6709\u4EBA\u4F7F\u7528"] = 11] = "login:\u8BE5\u6635\u79F0\u5DF2\u7ECF\u6709\u4EBA\u4F7F\u7528";
     errorCode[errorCode["login:\u7C7B\u578B\u8BF7\u6C42\u7F3A\u5C11\u5FC5\u8981\u7684\u53C2\u6570"] = 12] = "login:\u7C7B\u578B\u8BF7\u6C42\u7F3A\u5C11\u5FC5\u8981\u7684\u53C2\u6570";
+    errorCode[errorCode["message:\u7C7B\u578B\u8BF7\u6C42\u53C2\u6570\u9519\u8BEF"] = 13] = "message:\u7C7B\u578B\u8BF7\u6C42\u53C2\u6570\u9519\u8BEF";
+    errorCode[errorCode["message:\u7C7B\u578B\u8BF7\u6C42\u7F3A\u5C11\u5FC5\u8981\u53C2\u6570"] = 14] = "message:\u7C7B\u578B\u8BF7\u6C42\u7F3A\u5C11\u5FC5\u8981\u53C2\u6570";
+    errorCode[errorCode["system:\u7528\u6237\u4E0D\u5B58\u5728"] = 100] = "system:\u7528\u6237\u4E0D\u5B58\u5728";
 })(errorCode = exports.errorCode || (exports.errorCode = {}));
 ;
 /**
@@ -32,17 +35,3 @@ var ReadyStateConstantsTranslated;
     ReadyStateConstantsTranslated["CLOSED"] = "\u5DF2\u5173\u95ED";
 })(ReadyStateConstantsTranslated = exports.ReadyStateConstantsTranslated || (exports.ReadyStateConstantsTranslated = {}));
 ;
-/**
- * 定义请求的类型
- */
-var requestType;
-(function (requestType) {
-    requestType["login"] = "login";
-})(requestType = exports.requestType || (exports.requestType = {}));
-/**
- * 定义服务器响应的类型
- */
-var responseType;
-(function (responseType) {
-    responseType["loginSuccess"] = "loginSuccess";
-})(responseType = exports.responseType || (exports.responseType = {}));

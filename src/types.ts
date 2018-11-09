@@ -30,6 +30,14 @@ export interface requestLoginType extends standardRequest {
     nickName:string;
 }
 
+/**
+ * 定义客户端消息发送事件
+ */
+export interface requestMessageType extends requestLoginType {
+    auth:string;
+    message:string;
+}
+
 // --------------------- 响应格式
 
 export interface standardResponse extends standardRequest {
@@ -45,4 +53,11 @@ export interface standardErrorResponse extends standardResponse {
  */
 export interface loginResponse extends standardResponse {
     auth: string;
+}
+
+/**
+ * 消息响应类型
+ */
+export interface messageResponse extends standardResponse {
+    type:'message';
 }
