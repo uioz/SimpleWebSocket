@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const dataPersistence_1 = require("./dataPersistence");
 const verification_1 = require("./verification");
 const public_1 = require("./public");
-// TODO Date格式化
 /**
  * 路由
  */
@@ -20,6 +19,7 @@ const route = {
                 time: time.toLocaleString(),
             }
         };
+        debugger;
         public_1.broadcast(nickName, broadCastResponse);
         const response = {
             type: 'login',

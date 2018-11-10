@@ -12,7 +12,7 @@ import { isString, isBoolean, isObject, isArray, isNumber } from "util";
  */
 export function broadcast(nickName: string, data: standardBroadCastResponse):void {
 
-    const sockets = getLiveSockets('nickName');
+    const sockets = getLiveSockets(nickName);
 
     for (const socket of sockets) {
 

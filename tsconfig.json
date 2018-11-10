@@ -11,11 +11,13 @@
         "lib": [
             "es5",
             "es6",
-            "es7"
+            "es7",
+            "dom"
         ]
     },
     "files": [
         "./src/server.ts",
         "./src/client.ts",
+        "./src/simpleEventEmitter.ts"
     ]
 }

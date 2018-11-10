@@ -4,8 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "buildServer": "tsc -p ./tsconfig.json",
-    "start": "node ./dist/server.js"
+    "watch": "tsc -p ./tsconfig.json",
+    "start": "node ./dist/server.js",
+    "test": "node ./dist/client.js",
+    "debug":"node --inspect --inspect-brk ./dist/server.js"
   },
   "author": "",
   "license": "ISC",

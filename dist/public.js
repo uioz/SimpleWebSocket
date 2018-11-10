@@ -9,7 +9,7 @@ const util_1 = require("util");
  * @param data 发送的数据
  */
 function broadcast(nickName, data) {
-    const sockets = dataPersistence_1.getLiveSockets('nickName');
+    const sockets = dataPersistence_1.getLiveSockets(nickName);
     for (const socket of sockets) {
         socket.send(JSON.stringify(data));
     }

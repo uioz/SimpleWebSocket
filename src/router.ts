@@ -12,8 +12,6 @@ import { addUser } from "./dataPersistence";
 import { checkAndFormat } from "./verification";
 import { closeProcess, broadcast } from "./public";
 
-// TODO Date格式化
-
 /**
  * 路由
  */
@@ -38,8 +36,9 @@ const route: routeI = {
             }
         };
 
-        broadcast(nickName, broadCastResponse);
 
+        debugger;
+        broadcast(nickName, broadCastResponse);
         const response: loginResponse = {
             type: 'login',
             result: true,
