@@ -1,12 +1,12 @@
 {
     "compilerOptions": {
         "module": "commonjs",
-        "target": "es6",
-        "outDir": "./dist",
+        "target": "es5",
+        "outDir": "./lib",
         "typeRoots": [
             "./node_modules/@types"
         ],
-        "watch": true,
+        "watch": false,
         "sourceMap": false,
         "lib": [
             "es5",
@@ -16,7 +16,6 @@
         ]
     },
     "files": [
-        "./src/server.ts",
         "./src/socketPackage.ts"
     ]
 }

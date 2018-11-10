@@ -11,32 +11,7 @@
 <body>
 
 
-    <script type="text/javascript">
-        
-        const ws = new WebSocket('ws://192.168.99.1:8080');
-
-        ws.addEventListener('open',(event)=>{
-            console.log('open',event);
-        });
-
-        ws.addEventListener('close',(event)=>{
-            console.log('close',event);
-        });
-
-        ws.addEventListener('error',(event)=>{
-            console.log('error',event);
-        });
-
-        ws.addEventListener('message',(event)=>{
-           console.log('message',event) 
-        });
-
-
-        setTimeout(() => {
-            ws.close();
-        }, 3000);
-        
-    </script>
+    <script src="./dist/socketPackage.js"></script>
 </body>
 
 </html>
