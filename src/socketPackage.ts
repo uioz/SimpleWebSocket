@@ -1,5 +1,6 @@
 import { SimpleEventEmitter } from "./simpleEventEmitter";
 import { requestLoginType,standardRequest,requestMessageType } from "./types";
+import * as WebSocket from "ws";
 
 /**
  * 描述接口内部状态的接口
@@ -36,7 +37,7 @@ interface lister {
  * - broadcast 由服务器向客户端广播的信息都会触发这个事件
  * - login 调用connect方法后登录成功会触发这个事件
  */
-class socketPackage  extends SimpleEventEmitter {
+export class socketPackage  extends SimpleEventEmitter {
 
     /**
      * 保存远程主机的地址
@@ -187,6 +188,7 @@ class socketPackage  extends SimpleEventEmitter {
             // 如果处于连接状态则彻底关闭连接并且清空引用
             if (codeArray.indexOf(this.webScoket.readyState) !== -1) {
                 this.terminate();
+                // TODO 测试connect 调用bug
             }
 
         }
@@ -242,27 +244,3 @@ class socketPackage  extends SimpleEventEmitter {
     }
 
 }
-
-const test = new socketPackage('WebSocket://127.0.0.1:8080','hello world');
-
-test.on('login',(response)=>{
-    console.log('login',response);
-
-    test.boradCast('hello world');
-});
-
-test.on('broadcast',(response)=>{
-    console.log('broadcast', response);
-});
-
-test.on('error',(error)=>{
-    console.log('error', error);
-});
-
-test.on('requesterror',(error)=>{
-    console.log('requestError', error);
-});
-
-test.on('close',(response)=>{
-    console.log('close', response);
-});

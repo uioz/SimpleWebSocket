@@ -17,6 +17,7 @@
     },
     "files": [
         "./src/server.ts",
-        "./src/socketPackage.ts"
+        "./src/socketPackage.ts",
+        "./test/clientTest.ts"
     ]
 }

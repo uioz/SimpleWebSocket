@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "watch": "tsc -p ./tsconfig.json",
-    "start": "node ./dist/server.js",
-    "test": "node ./dist/client.js",
+    "start": "node ./dist/src/server.js",
+    "test": "node ./dist/test/clientTest.js",
     "debug":"node --inspect --inspect-brk ./dist/server.js"
   },
   "author": "",
