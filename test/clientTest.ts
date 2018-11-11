@@ -87,7 +87,7 @@ rl.on('line', (line) => {
         case 'send':
             rl.question(`请输入JSON格式的信息,不输入则跳过: \n`, (answer) => {
                 if(answer){
-                    client.send(JSON.parse(answer));
+                    (client as any).send(JSON.parse(answer));
                 }
                 rl.prompt();
             });

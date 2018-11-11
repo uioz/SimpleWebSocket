@@ -2,27 +2,44 @@ import * as WebSocket  from "ws";
 import { router } from "./router";
 import * as readline from "readline";
 
-let port: number = 8888;
+let defaultPort: number = 8888;
+let myPort:number;
 
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-    prompt: '> '
-});
+if(myPort){
 
-rl.prompt();
+    defaultPort = myPort;
 
-rl.question(`请输入服务器启用的端口号-默认端口号${port} 不输入端口号则使用默认端口号! \n`, (answer) => {
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+        prompt: '> '
+    });
 
-    
+    rl.prompt();
 
-    if (answer) {
-        port = parseInt(answer);
-    }
+    rl.question(`请输入服务器启用的端口号-默认端口号${defaultPort} 不输入端口号则使用默认端口号! \n`, (answer) => {
 
 
+
+        if (answer) {
+            defaultPort = parseInt(answer);
+        }
+
+        createServer();
+
+
+    });
+
+} else {
+
+    createServer();
+
+}
+
+
+function createServer() {
     const wss = new WebSocket.Server({
-        port: port
+        port: defaultPort
     });
 
     wss.on('connection', router);
@@ -32,10 +49,6 @@ rl.question(`请输入服务器启用的端口号-默认端口号${port} 不输�
     });
 
     wss.on('listening', () => {
-        console.log(`WebSocket Server has running in ${port} port!`);
+        console.log(`WebSocket Server has running in ${defaultPort} port!`);
     });
-
-
-});
-
-
+};

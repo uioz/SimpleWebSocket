@@ -11,7 +11,24 @@
 <body>
 
 
-    <script src="./dist/socketPackage.js"></script>
+    <script >
+    
+    let url = 'ws://127.0.0.1:8888';
+
+    const ws = new WebSocket(url);
+    
+    ws.addEventListener('open',(event)=>{
+        console.log('open',event);
+    });
+
+    ws.addEventListener('message',(event)=>{
+        console.log('message',event);
+    });
+
+    ws.addEventListener("error",(error)=>{
+        console.log('error',error);
+    });
+    </script>
 </body>
 
 </html>
