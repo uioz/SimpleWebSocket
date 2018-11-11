@@ -1,7 +1,8 @@
 import * as webSocket from "ws";
 import { standardErrorResponse, standardBroadCastResponse,broadCastLogoutResponse } from "./types";
 import { ErrorCode, ErrorType } from "./code";
-import { removeUser, getLiveSockets,hasUser } from "./dataPersistence";
+import { removeUser, getLiveSockets, hasUser, getUserSocketCollection } from "./dataPersistence";
+import { circlingTask } from "./circlingTask";
 import { isString, isBoolean, isObject, isArray, isNumber } from "util";
 
 
@@ -221,6 +222,59 @@ export class dataCompare {
         }
 
         return dataCompare.StateCode['匹配正确'];
+
+    };
+
+};
+
+/**
+ * 这是一个闭包函数
+ * 
+ * 他会每隔一段时间扫描所有的连接找出其中崩溃的连接然后做下线处理.
+ * 
+ * 并且告知其他用户.
+ */
+export function crashedProcess() {
+    
+    const 
+    Tasks = new circlingTask(),
+    userSockets = getUserSocketCollection();
+
+    Tasks
+    .setDelayTime(10000)
+    .setTask(()=>{
+
+        const sockets = userSockets.values();
+
+        for (const socket of sockets) {
+            
+            if (socket.readyState === 0 || socket.readyState === 1 ){
+                continue;
+            }
+
+            const nickName: string = (socket as any).nickName;
+
+            removeUser(nickName);
+
+            const response: broadCastLogoutResponse = {
+                type: 'broadCastLogout',
+                result: {
+                    userName: nickName,
+                    time: new Date().toLocaleString()
+                }
+            };
+
+            broadcast(nickName, response);
+
+        }
+
+    });
+
+    Tasks.start();
+
+    return function () {
+
+        return Tasks;
 
     };
 

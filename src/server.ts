@@ -1,5 +1,6 @@
 import * as WebSocket  from "ws";
 import { router } from "./router";
+import { crashedProcess } from "./public";
 import * as readline from "readline";
 
 let defaultPort: number = 8888;
@@ -8,6 +9,10 @@ let myPort:number;
 if(myPort){
 
     defaultPort = myPort;
+
+    createServer();
+
+} else {
 
     const rl = readline.createInterface({
         input: process.stdin,
@@ -30,10 +35,6 @@ if(myPort){
 
     });
 
-} else {
-
-    createServer();
-
 }
 
 
@@ -51,4 +52,6 @@ function createServer() {
     wss.on('listening', () => {
         console.log(`WebSocket Server has running in ${defaultPort} port!`);
     });
+
+    crashedProcess();
 };

@@ -2,11 +2,15 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const WebSocket = require("ws");
 const router_1 = require("./router");
+const public_1 = require("./public");
 const readline = require("readline");
 let defaultPort = 8888;
 let myPort;
 if (myPort) {
     defaultPort = myPort;
+    createServer();
+}
+else {
     const rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout,
@@ -20,9 +24,6 @@ if (myPort) {
         createServer();
     });
 }
-else {
-    createServer();
-}
 function createServer() {
     const wss = new WebSocket.Server({
         port: defaultPort
@@ -34,5 +35,6 @@ function createServer() {
     wss.on('listening', () => {
         console.log(`WebSocket Server has running in ${defaultPort} port!`);
     });
+    public_1.crashedProcess();
 }
 ;

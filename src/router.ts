@@ -99,6 +99,7 @@ export function router(ws: webSocket) {
 
     });
 
+    // TODO 测试不使用bind 的closeProcess是否可以正确执行
     closeProcess.bind(ws);
 
     ws.once('error', closeProcess);

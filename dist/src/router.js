@@ -65,6 +65,7 @@ function router(ws) {
         }
         return ws.terminate();
     });
+    // TODO 测试不使用bind 的closeProcess是否可以正确执行
     public_1.closeProcess.bind(ws);
     ws.once('error', public_1.closeProcess);
     ws.once('close', public_1.closeProcess);

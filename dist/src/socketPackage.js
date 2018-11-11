@@ -129,11 +129,11 @@ class socketPackage extends simpleEventEmitter_1.SimpleEventEmitter {
                 this.terminate();
             }
         }
-        if (!this.nickName && !nickName) {
-            throw new Error('内部没有昵称,可以在connect方法或者新建实例的时候传入');
+        if (nickName) {
+            this.nickName = nickName;
         }
         if (!this.nickName) {
-            this.nickName = nickName;
+            throw new Error('内部没有昵称,可以在connect方法或者新建实例的时候传入');
         }
         this.webScoket = new WebSocket(this.url);
         this.process();

@@ -18,6 +18,7 @@
     "files": [
         "./src/server.ts",
         "./src/socketPackage.ts",
-        "./test/clientTest.ts"
+        "./test/clientTest.ts",
+        "./src/circlingTask.ts"
     ]
 }

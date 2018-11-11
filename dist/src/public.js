@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const code_1 = require("./code");
 const dataPersistence_1 = require("./dataPersistence");
+const circlingTask_1 = require("./circlingTask");
 const util_1 = require("util");
 /**
  * 向除了该用户的所有在线的用户广播消息
@@ -184,4 +185,40 @@ class dataCompare {
  */
 dataCompare.StateCode = compareStateCode;
 exports.dataCompare = dataCompare;
+;
+/**
+ * 这是一个闭包函数
+ *
+ * 他会每隔一段时间扫描所有的连接找出其中崩溃的连接然后做下线处理.
+ *
+ * 并且告知其他用户.
+ */
+function crashedProcess() {
+    const Tasks = new circlingTask_1.circlingTask(), userSockets = dataPersistence_1.getUserSocketCollection();
+    Tasks
+        .setDelayTime(10000)
+        .setTask(() => {
+        const sockets = userSockets.values();
+        for (const socket of sockets) {
+            if (socket.readyState === 0 || socket.readyState === 1) {
+                continue;
+            }
+            const nickName = socket.nickName;
+            dataPersistence_1.removeUser(nickName);
+            const response = {
+                type: 'broadCastLogout',
+                result: {
+                    userName: nickName,
+                    time: new Date().toLocaleString()
+                }
+            };
+            broadcast(nickName, response);
+        }
+    });
+    Tasks.start();
+    return function () {
+        return Tasks;
+    };
+}
+exports.crashedProcess = crashedProcess;
 ;
