@@ -1,7 +1,7 @@
 import { socketPackage } from "../src/socketPackage";
 import * as readline from "readline";
 
-const test = new socketPackage('WebSocket://127.0.0.1:8080', 'hello world');
+const test = new socketPackage('ws://127.0.0.1:8080', 'hello world');
 
 test.on('login', (response) => {
     console.log('login', response);

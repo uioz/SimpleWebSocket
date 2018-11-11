@@ -7,7 +7,8 @@
     "watch": "tsc -p ./tsconfig.json",
     "start": "node ./dist/src/server.js",
     "test": "node ./dist/test/clientTest.js",
-    "debug":"node --inspect --inspect-brk ./dist/server.js"
+    "debug":"node --inspect --inspect-brk ./dist/src/server.js",
+    "testDebug":"node --inspect --inspect-brk ./dist/test/clientTest.js"
   },
   "author": "",
   "license": "ISC",

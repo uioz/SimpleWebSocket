@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const socketPackage_1 = require("../src/socketPackage");
 const readline = require("readline");
-const test = new socketPackage_1.socketPackage('WebSocket://127.0.0.1:8080', 'hello world');
+const test = new socketPackage_1.socketPackage('ws://127.0.0.1:8080', 'hello world');
 test.on('login', (response) => {
     console.log('login', response);
 });

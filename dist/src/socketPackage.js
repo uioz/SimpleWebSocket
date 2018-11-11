@@ -127,13 +127,14 @@ class socketPackage extends simpleEventEmitter_1.SimpleEventEmitter {
             // 如果处于连接状态则彻底关闭连接并且清空引用
             if (codeArray.indexOf(this.webScoket.readyState) !== -1) {
                 this.terminate();
-                // TODO 测试connect 调用bug
             }
         }
         if (!this.nickName && !nickName) {
             throw new Error('内部没有昵称,可以在connect方法或者新建实例的时候传入');
         }
-        this.nickName = nickName;
+        if (!this.nickName) {
+            this.nickName = nickName;
+        }
         this.webScoket = new WebSocket(this.url);
         this.process();
     }
@@ -165,6 +166,7 @@ class socketPackage extends simpleEventEmitter_1.SimpleEventEmitter {
     close() {
         if (this.webScoket && this.state.login) {
             this.webScoket.close();
+            this.terminate();
         }
     }
 }

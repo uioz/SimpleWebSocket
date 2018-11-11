@@ -2,7 +2,7 @@ import * as WebSocket  from "ws";
 import { router } from "./router";
 
 const wss = new WebSocket.Server({
-    port:8080
+    port:4012
 });
 
 wss.on('connection',router);
