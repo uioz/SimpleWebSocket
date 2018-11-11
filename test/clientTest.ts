@@ -1,27 +1,10 @@
 import { socketPackage } from "../src/socketPackage";
 import * as readline from "readline";
 
-const test = new socketPackage('ws://127.0.0.1:8080', 'hello world');
+let url = 'ws://127.0.0.1:8888';
+let nickName = '二狗子';
 
-test.on('login', (response) => {
-    console.log('login', response);
-});
-
-test.on('broadcast', (response) => {
-    console.log('broadcast', response);
-});
-
-test.on('error', (error) => {
-    console.log('error', error);
-});
-
-test.on('requesterror', (error) => {
-    console.log('requestError', error);
-});
-
-test.on('close', (response) => {
-    console.log('close', response);
-});
+let client:socketPackage;
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -37,15 +20,65 @@ const rl = readline.createInterface({
 
 rl.prompt();
 
+function runClient() {
+    const client = new socketPackage(url, nickName);
+
+    client.on('login', (response) => {
+        console.log('login', response);
+    });
+
+    client.on('broadcast', (response) => {
+        console.log('broadcast', response);
+    });
+
+    client.on('error', (error) => {
+        console.log('error', error);
+    });
+
+    client.on('requesterror', (error) => {
+        console.log('requestError', error);
+    });
+
+    client.on('close', (response) => {
+        console.log('close', response);
+    });
+
+    return client;
+};
+
+
+rl.question('请输入Url地址例如默认地址 ws://127.0.0.1:8888 直接回车则使用默认地址! ',(answer)=>{
+
+    if(answer){
+        url = answer;
+    }
+
+    rl.prompt();
+
+    rl.question('请输入初始用户的昵称默认昵称 二狗子 ', (answer) => {
+
+        if (answer) {
+            nickName = answer;
+        }
+
+        client = runClient();
+
+    });
+
+});
+
+
+rl.prompt();
+
 rl.on('line', (line) => {
     switch (line.trim()) {
         case 'connect':
-            rl.question(`请输入昵称,不输入使用默认昵称,当前昵称<${'hello'}>: \n`, (answer) => {
+            rl.question(`请输入昵称,不输入使用默认昵称,当前昵称<${(client as any).nickName}>: \n`, (answer) => {
                 
                 if(answer){
-                    test.connect(answer);
+                    client.connect(answer);
                 }else{
-                    test.connect();
+                    client.connect();
                 }
 
                 rl.prompt();
@@ -54,7 +87,7 @@ rl.on('line', (line) => {
         case 'send':
             rl.question(`请输入JSON格式的信息,不输入则跳过: \n`, (answer) => {
                 if(answer){
-                    test.send(JSON.parse(answer));
+                    client.send(JSON.parse(answer));
                 }
                 rl.prompt();
             });
@@ -62,7 +95,7 @@ rl.on('line', (line) => {
         case 'broadcast':
             rl.question(`请输入需要广播的信息: \n`, (answer) => {
                 if(answer){
-                    test.boradCast(answer)
+                    client.boradCast(answer)
                 }
                 rl.prompt();
             });
@@ -70,7 +103,7 @@ rl.on('line', (line) => {
         case 'close':
             rl.question(`y\\n`, (answer) => {
                 if (answer.toLocaleLowerCase() === 'y') {
-                    test.close();
+                    client.close();
                 }
                 rl.prompt();
             });

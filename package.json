@@ -5,10 +5,10 @@
   "main": "index.js",
   "scripts": {
     "watch": "tsc -p ./tsconfig.json",
-    "start": "node ./dist/src/server.js",
-    "test": "node ./dist/test/clientTest.js",
-    "debug":"node --inspect --inspect-brk ./dist/src/server.js",
-    "testDebug":"node --inspect --inspect-brk ./dist/test/clientTest.js"
+    "server": "node ./dist/src/server.js",
+    "client": "node ./dist/test/clientTest.js",
+    "serverdebug":"node --inspect --inspect-brk ./dist/src/server.js",
+    "clientdebug":"node --inspect --inspect-brk ./dist/test/clientTest.js"
   },
   "author": "",
   "license": "ISC",
