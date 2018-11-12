@@ -96,13 +96,14 @@ class responseFactory {
     ;
 }
 exports.responseFactory = responseFactory;
+;
 /**
  * 向除了该用户的所有在线的用户广播消息
  * @param nickName 用户昵称
  * @param data 发送的数据
  */
 function broadcast(nickName, data) {
-    const sockets = dataPersistence_1.getLiveSockets(nickName);
+    const sockets = dataPersistence_1.getOtherPeopleSocket(nickName);
     for (const socket of sockets) {
         socket.send(JSON.stringify(data));
     }
@@ -151,9 +152,9 @@ exports.sendErrorMessage = sendErrorMessage;
  */
 function closeProcess(errorOrcloseCode, closeCodeReason) {
     this.removeAllListeners();
-    const nickName = this.nickName;
-    if (dataPersistence_1.hasUser(nickName)) {
-        dataPersistence_1.removeUser(nickName);
+    const nickName = this.nickName, groupName = this.nickName;
+    if (dataPersistence_1.hasUser(groupName, nickName)) {
+        dataPersistence_1.removeUser(groupName, nickName);
         broadcast(nickName, responseFactory.getBroadCastLogoutResponse(nickName));
         console.log('\n', '---------------closeAndErrorProcess--------------');
         console.log(typeof errorOrcloseCode == 'object' ? `昵称:${nickName}连接错误:` : `昵称:${nickName}通信关闭-关闭代码`, errorOrcloseCode, '\n');
@@ -288,9 +289,9 @@ function crashedProcess() {
             if (socket.readyState === 0 || socket.readyState === 1) {
                 continue;
             }
-            console.log('崩溃扫描命中-昵称: ', socket.nickName);
-            const nickName = socket.nickName;
-            dataPersistence_1.removeUser(nickName);
+            const nickName = socket.nickName, groupName = socket.groupName;
+            console.log('崩溃扫描命中-昵称: ', nickName, '所在群组: ', groupName);
+            dataPersistence_1.removeUser(groupName, nickName);
             broadcast(nickName, responseFactory.getBroadCastLogoutResponse(nickName));
         }
     });
@@ -301,3 +302,5 @@ function crashedProcess() {
 }
 exports.crashedProcess = crashedProcess;
 ;
+// TODO 服务器添加口令
+// TODO 服务器添加群众

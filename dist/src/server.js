@@ -1,40 +1,34 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const WebSocket = require("ws");
-const readline = require("readline");
 const router_1 = require("./router");
 const public_1 = require("./public");
-let defaultPort = 8888;
-let myPort;
-if (myPort) {
-    defaultPort = myPort;
-    createServer();
+const dataPersistence_1 = require("./dataPersistence");
+const userInput = process.argv.splice(2);
+if (userInput.length < 2) {
+    throw new Error('参数缺失');
 }
-else {
-    const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout,
-        prompt: '> '
-    });
-    rl.prompt();
-    rl.question(`请输入服务器启用的端口号-默认端口号${defaultPort} 不输入端口号则使用默认端口号! \n`, (answer) => {
-        if (answer) {
-            defaultPort = parseInt(answer);
-        }
-        createServer();
-    });
+// 设置服务器端口
+const defaultPort = parseInt(userInput.shift()) || 8888;
+// 设置服务器签名
+const serverToken = userInput.pop();
+if (!serverToken) {
+    throw new Error('必须有服务器签名用于前后端交互使用!');
 }
-function createServer() {
-    const wss = new WebSocket.Server({
-        port: defaultPort
-    });
-    wss.on('connection', router_1.router);
-    wss.on('error', (error) => {
-        console.error(error);
-    });
-    wss.on('listening', () => {
-        console.log(`WebSocket Server has running in ${defaultPort} port!`);
-    });
-    public_1.crashedProcess();
-}
-;
+dataPersistence_1.setServerToken(serverToken);
+// 设置服务器用户组
+const userGroupNames = userInput.length ? userInput : [dataPersistence_1.getDefaultGroupName()];
+dataPersistence_1.setDefaultGroupName(userGroupNames[0]);
+dataPersistence_1.setUserGroup(userGroupNames);
+const wss = new WebSocket.Server({
+    port: defaultPort
+});
+wss.on('connection', router_1.router);
+wss.on('error', (error) => {
+    console.error(error);
+});
+wss.on('listening', () => {
+    console.log(`WebSocket Server has running in ${defaultPort} port!`);
+});
+// 启用超时检查
+public_1.crashedProcess();

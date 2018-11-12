@@ -10,7 +10,7 @@ import {
     loginResponse
 } from "./types";
 import { ErrorCode, ErrorType } from "./code";
-import { removeUser, getLiveSockets, hasUser, getUserSocketCollection } from "./dataPersistence";
+import { removeUser, getOtherPeopleSocket, hasUser, getUserSocketCollection } from "./dataPersistence";
 import { circlingTask } from "./circlingTask";
 import { isString, isBoolean, isObject, isArray, isNumber } from "util";
 
@@ -105,7 +105,7 @@ export class responseFactory {
         }
     };
 
-}
+};
 
 
 /**
@@ -115,7 +115,7 @@ export class responseFactory {
  */
 export function broadcast(nickName: string, data: standardBroadCastResponse): void {
 
-    const sockets = getLiveSockets(nickName);
+    const sockets = getOtherPeopleSocket(nickName);
 
     for (const socket of sockets) {
 
@@ -174,11 +174,13 @@ export function closeProcess(this: webSocket, errorOrcloseCode: object | number,
 
     this.removeAllListeners();
 
-    const nickName: string = (this as any).nickName;
+    const 
+    nickName: string = (this as any).nickName,
+    groupName:string = (this as any).nickName;
 
-    if (hasUser(nickName)) {
+    if (hasUser(groupName,nickName)) {
 
-        removeUser(nickName);
+        removeUser(groupName,nickName);
 
         broadcast(nickName, responseFactory.getBroadCastLogoutResponse(nickName))
 
@@ -345,12 +347,12 @@ export function crashedProcess() {
                 if (socket.readyState === 0 || socket.readyState === 1) {
                     continue;
                 }
+                const nickName: string = (socket as any).nickName,
+                      groupName:string = (socket as any).groupName;
 
-                console.log('崩溃扫描命中-昵称: ',(socket as any).nickName);
+                console.log('崩溃扫描命中-昵称: ',nickName,'所在群组: ',groupName);
 
-                const nickName: string = (socket as any).nickName;
-
-                removeUser(nickName);
+                removeUser(groupName,nickName);
 
                 broadcast(nickName, responseFactory.getBroadCastLogoutResponse(nickName));
 
@@ -367,4 +369,7 @@ export function crashedProcess() {
     };
 
 };
+
+// TODO 服务器添加口令
+// TODO 服务器添加群众
 

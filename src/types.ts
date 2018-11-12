@@ -4,7 +4,7 @@ import * as webSocket from "ws";
  * 定义检查路由的类型
  */
 export interface routeParamCheckI {
-    [key: string]: (request: standardRequest) => boolean | number;
+    [key: string]: (request: standardRequest, ws: webSocket) => boolean | number;
 }
 
 /**
@@ -20,20 +20,22 @@ export interface routeI {
  * 用户请求的基本格式
  */
 export interface standardRequest {
+    nickName: string;
     type: string;
+    token: string;
 }
 
 /**
  * 定义login请求的类型
  */
 export interface requestLoginType extends standardRequest {
-    nickName:string;
+    groupName?:string;
 }
 
 /**
  * 定义客户端消息发送事件
  */
-export interface requestMessageType extends requestLoginType {
+export interface requestMessageType extends standardRequest {
     auth:string;
     message:string;
 }
@@ -54,6 +56,8 @@ export interface standardErrorResponse extends standardResponse {
 export interface loginResponse extends standardResponse {
     type:'login';
     auth: string;
+    groupName:string;
+    allGroups:string[];
 }
 
 /**

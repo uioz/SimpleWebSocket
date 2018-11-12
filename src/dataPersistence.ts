@@ -1,5 +1,4 @@
 import * as WebSocket from 'ws';
-import { ReadyStateConstants } from "./code";
 
 /**
  * 保存所有用户连接
@@ -9,48 +8,84 @@ import { ReadyStateConstants } from "./code";
 const userCollection: Map<string, WebSocket> = new Map();
 
 /**
- * 保存当前所有用户的昵称和对应的id
+ * 以Group的形式保存用户 键是用户组名称 值是nickName对应的userID组成的Map
  */
-const userNickNameCollection: Map<string, string> = new Map();
+const userGroup: Map<string, Map<string, string>> = new Map();
 
-/**
- * 获取用户昵称和对应的id集合
- */
-export function getUsersIdCollection() {
-    return userNickNameCollection;
+let defaultGroupName = 'defaultName';
+
+export function setDefaultGroupName(newName:string) {
+    defaultGroupName = newName;
 };
 
-/**
- * 获取用户id对应的socket集合
- */
-export function getUserSocketCollection() {
-    return userCollection;
+export function getDefaultGroupName() {
+    return defaultGroupName;
 };
 
+export function hasGroupName(name:string) {
+    return userGroup.has(name);
+};
+
+let serverToken = '';
+
+export function setServerToken(newName: string) {
+    serverToken = newName;
+};
+
+export function getServerToken() {
+    return serverToken;
+};
+
+
+
 /**
- * 检测是否存在该用户
+ * 检测指定群组下是是否存在指定昵称的用户
+ * @param groupName 群组名称
  * @param nickName 用户昵称
  */
-export const hasUser = (nickName: string) => userNickNameCollection.has(nickName);
+export function hasUser(groupName: string, nickName: string): boolean {
+
+    return userGroup.get(groupName).has(nickName);
+}
 
 /**
- * 删除用户的所有信息,如果存在该用户
+ * 使用给定的用户组名称来创建多个用户组
+ * @param groupNames 有字符串组成的用户组
+ */
+export function setUserGroup(groupNames:string[]) {
+    for (const name of groupNames) {
+        userGroup.set(name,new Map());
+    }
+};
+
+
+
+
+/**
+ * 删除指定群组的指定昵称的用户
+ * @param groupName 群组的名称
  * @param nickName 用户的昵称
  */
-export function removeUser(nickName: string): boolean {
+export function removeUser(groupName:string,nickName: string): boolean {
 
-    const userId = userNickNameCollection.get(nickName);
+    const nickNameMap = userGroup.get(groupName);
 
-    if (!userId) {
+    if(!nickNameMap){
         return false;
     }
 
-    userNickNameCollection.delete(nickName);
-    userCollection.delete(userId);
+    const userID = nickNameMap.get(nickName);
+
+    if(!userID){
+        return false;
+    }
+
+    userCollection.delete(userID);
+    nickNameMap.delete(nickName);
     
     return true;
 
-}
+};
 
 /**
  * 添加一个用户,如果已存在用户返回false
@@ -58,15 +93,17 @@ export function removeUser(nickName: string): boolean {
  * @param auth 用户凭证
  * @param webSocket 用户socket
  */
-export function addUser(nickName: string, auth: string, webSocket: WebSocket): boolean {
+export function addUser(groupName:string,nickName: string, auth: string, webSocket: WebSocket): boolean {
 
-    if (hasUser(nickName)) {
+    if (hasUser(groupName,nickName)) {
         return false;
     }
 
-    const userId = nickName + auth;
+    const 
+    userId = nickName + auth,
+    nickNameMap = userGroup.get(groupName);
 
-    userNickNameCollection.set(nickName, userId);
+    nickNameMap.set(nickName,userId);
     userCollection.set(userId, webSocket);
 
     return true;
@@ -79,28 +116,26 @@ export function addUser(nickName: string, auth: string, webSocket: WebSocket): b
  * - 如果传入了用户昵称则返回没有该用户且没有均在OPEN状态的socket集合
  * @param nickName 用户昵称
  */
-export function getLiveSockets(): IterableIterator<WebSocket>;
-export function getLiveSockets(nickName: string): Array<WebSocket>;
-export function getLiveSockets(nickName?: string) {
+export function getOtherPeopleSocket(): IterableIterator<WebSocket>;
+export function getOtherPeopleSocket(groupName:string,nickName: string): Array<WebSocket>;
+export function getOtherPeopleSocket(groupName?:string,nickName?: string) {
 
     const iterator = userCollection.values();
 
-    if (!nickName) {
+    if (!nickName && !groupName) {
         return iterator;
     }
 
-    const userId = userNickNameCollection.get(nickName),
-        userSocket = userCollection.get(userId),
-        result: Array<WebSocket> = [],
-        OPENCODE = ReadyStateConstants['OPEN'];
+    const 
+    nickNameMap = userGroup.get(groupName),
+    allUsersID = nickNameMap.values(),
+    userID = nickNameMap.get(nickName),
+    result:Array<WebSocket> = [];
 
+    for (const otherUserID of allUsersID) {
 
-    for (const socket of iterator) {
-
-        if (userSocket !== socket && socket.readyState === OPENCODE) {
-
-            result.push(socket);
-
+        if(otherUserID !== userID){
+            result.push(userCollection.get(otherUserID));
         }
 
     }

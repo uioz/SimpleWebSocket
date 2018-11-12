@@ -1,63 +1,46 @@
 import * as WebSocket  from "ws";
-import * as readline from "readline";
 import { router } from "./router";
 import { crashedProcess } from "./public";
+import { setUserGroup,getDefaultGroupName,setServerToken, setDefaultGroupName } from "./dataPersistence";
 
-let defaultPort: number = 8888;
-let myPort:number;
+const userInput = process.argv.splice(2);
 
-if(myPort){
-
-    defaultPort = myPort;
-
-    createServer();
-
-} else {
-
-    const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout,
-        prompt: '> '
-    });
-
-    rl.prompt();
-
-    rl.question(`请输入服务器启用的端口号-默认端口号${defaultPort} 不输入端口号则使用默认端口号! \n`, (answer) => {
-
-
-
-        if (answer) {
-            defaultPort = parseInt(answer);
-        }
-
-        createServer();
-
-
-    });
-
+if(userInput.length < 2 ){
+    throw new Error('参数缺失');
 }
 
+// 设置服务器端口
+const defaultPort: number = parseInt(userInput.shift()) || 8888;
 
-function createServer() {
+// 设置服务器签名
+const serverToken:string = userInput.pop();
+if(!serverToken){
+    throw new Error('必须有服务器签名用于前后端交互使用!');
+}
+setServerToken(serverToken);
 
-    const wss = new WebSocket.Server({
-        port: defaultPort
-    });
+// 设置服务器用户组
+const userGroupNames = userInput.length ? userInput : [getDefaultGroupName()];
+setDefaultGroupName(userGroupNames[0]);
+setUserGroup(userGroupNames);
 
-    wss.on('connection', router);
+const wss = new WebSocket.Server({
+    port: defaultPort
+});
 
-    wss.on('error', (error) => {
+wss.on('connection', router);
 
-        console.error(error);
+wss.on('error', (error) => {
 
-    });
+    console.error(error);
 
-    wss.on('listening', () => {
+});
 
-        console.log(`WebSocket Server has running in ${defaultPort} port!`);
-        
-    });
+wss.on('listening', () => {
 
-    crashedProcess();
+    console.log(`WebSocket Server has running in ${defaultPort} port!`);
 
-};
+});
+
+// 启用超时检查
+crashedProcess();

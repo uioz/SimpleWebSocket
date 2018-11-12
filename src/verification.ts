@@ -1,5 +1,5 @@
 import { routeParamCheckI, requestLoginType, requestMessageType,standardRequest } from "./types";
-import { hasUser } from "./dataPersistence";
+import { hasUser,getServerToken,hasGroupName, getDefaultGroupName } from "./dataPersistence";
 import { ErrorCode } from "./code";
 import { sendErrorMessage, dataCompare as Compare,logError } from "./public";
 import * as webSocket from "ws";
@@ -10,14 +10,17 @@ const loginExp = /^[^\s][^\s]{0,9}$/;
 
 dataCompare.setStandardCompare('login',{
     type:'string',
-    nickName:'string'
+    nickName:'string',
+    token:'string'
 });
 dataCompare.setStandardCompare('message',{
     type:'string',
     nickName:'string',
+    token:'string',
     auth:'string',
     message:'string'
 });
+
 
 /**
  * 执行路由前的参数完整性检查
@@ -25,7 +28,6 @@ dataCompare.setStandardCompare('message',{
 export const paramCheck: routeParamCheckI = {
     login(request: requestLoginType) {
 
-        // 获取状态码
         const compareStateCode = dataCompare.compare('login',request);
 
         if(!compareStateCode){
@@ -36,8 +38,26 @@ export const paramCheck: routeParamCheckI = {
 
             }
 
-            if(hasUser(request.nickName)){
+            let groupName = request.groupName;
+
+            if(groupName){
+
+                if(!hasGroupName(groupName)){
+
+                    return ErrorCode['system:群组不存在'];
+
+                }
+
+            }else{
+
+                groupName = getDefaultGroupName();
+
+            }
+
+            if(hasUser(groupName,request.nickName)){
+
                 return ErrorCode['login:该昵称已经有人使用'];
+                
             }
 
             return true;
@@ -45,20 +65,26 @@ export const paramCheck: routeParamCheckI = {
         }
 
         if(compareStateCode == 1){
+
             return ErrorCode['login:类型请求缺少必要的参数'];
         }else{
+
             return ErrorCode['system:请求参数错误'];
         }
 
     },
-    message(request: requestMessageType) {
+    message(request: requestMessageType,webSocket) {
 
         // 获取状态码
         const compareStateCode = dataCompare.compare('message', request);
 
         if(!compareStateCode){
 
-            if(!hasUser(request.nickName)){
+            const 
+            nickName = request.nickName,
+            groupName = (webSocket as any).groupName;
+
+            if(!hasUser(groupName,nickName)){
                 return ErrorCode['system:用户不存在'];
             }
 
@@ -101,6 +127,20 @@ export function formatUserData(userData: string): standardRequest | number {
 };
 
 /**
+ * 用于拦截没有serverToken的请求
+ * @param request 请求对象
+ */
+function autoFirewall(request: requestLoginType): number | true {
+
+    if (request.token !== getServerToken()) {
+        return ErrorCode['system:请求参数错误'];
+    }
+
+    return true;
+};
+
+
+/**
  * 校验传入的数据是否符合要求
  * 
  * - 符合返回解析后的对象
@@ -113,24 +153,30 @@ export function checkAndFormat(ws: webSocket, data: string): standardRequest | f
     const requestParam = formatUserData(data),
         requestType = requestParam['type'];
 
-    // 返回错误码
+    // 数据格式化过滤器
     if (typeof requestParam == 'number') {
         sendErrorMessage(ws, requestParam);
         logError(ErrorCode['error:数据格式化错误'],data);
         return false;
     }
 
-    // 如果没有对应的检测器
+    // 服务器Token过滤器
+    const ifNotHaveTokenCode = autoFirewall(requestParam)
+    if(typeof ifNotHaveTokenCode === 'number'){
+        sendErrorMessage(ws,ifNotHaveTokenCode);
+        logError(ErrorCode['error:没有Token'],data);
+        return false;
+    }
+
+    // 请求类型过滤器
     if (!paramCheck[requestType]) {
         sendErrorMessage(ws, ErrorCode['system:请求参数错误']);
         logError(ErrorCode['error:没有对应的检测器'], data);
         return false;
     }
 
-    // 获取校验结果 
-    const requestCheckResult = paramCheck[requestType](requestParam);
-
-    // 返回错误码
+    // 路由过滤器
+    const requestCheckResult = paramCheck[requestType](requestParam,ws);
     if (typeof requestCheckResult == 'number') {
         sendErrorMessage(ws, requestCheckResult);
         logError(ErrorCode['error:数据校检错误'], data);

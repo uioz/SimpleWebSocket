@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const code_1 = require("./code");
 /**
  * 保存所有用户连接
  *
@@ -8,73 +7,105 @@ const code_1 = require("./code");
  */
 const userCollection = new Map();
 /**
- * 保存当前所有用户的昵称和对应的id
+ * 以Group的形式保存用户 键是用户组名称 值是nickName对应的userID组成的Map
  */
-const userNickNameCollection = new Map();
-/**
- * 获取用户昵称和对应的id集合
- */
-function getUsersIdCollection() {
-    return userNickNameCollection;
+const userGroup = new Map();
+let defaultGroupName = 'defaultName';
+function setDefaultGroupName(newName) {
+    defaultGroupName = newName;
 }
-exports.getUsersIdCollection = getUsersIdCollection;
+exports.setDefaultGroupName = setDefaultGroupName;
+;
+function getDefaultGroupName() {
+    return defaultGroupName;
+}
+exports.getDefaultGroupName = getDefaultGroupName;
+;
+function hasGroupName(name) {
+    return userGroup.has(name);
+}
+exports.hasGroupName = hasGroupName;
+;
+let serverToken = '';
+function setServerToken(newName) {
+    serverToken = newName;
+}
+exports.setServerToken = setServerToken;
+;
+function getServerToken() {
+    return serverToken;
+}
+exports.getServerToken = getServerToken;
 ;
 /**
- * 获取用户id对应的socket集合
- */
-function getUserSocketCollection() {
-    return userCollection;
-}
-exports.getUserSocketCollection = getUserSocketCollection;
-;
-/**
- * 检测是否存在该用户
+ * 检测指定群组下是是否存在指定昵称的用户
+ * @param groupName 群组名称
  * @param nickName 用户昵称
  */
-exports.hasUser = (nickName) => userNickNameCollection.has(nickName);
+function hasUser(groupName, nickName) {
+    return userGroup.get(groupName).has(nickName);
+}
+exports.hasUser = hasUser;
 /**
- * 删除用户的所有信息,如果存在该用户
+ * 使用给定的用户组名称来创建多个用户组
+ * @param groupNames 有字符串组成的用户组
+ */
+function setUserGroup(groupNames) {
+    for (const name of groupNames) {
+        userGroup.set(name, new Map());
+    }
+}
+exports.setUserGroup = setUserGroup;
+;
+/**
+ * 删除指定群组的指定昵称的用户
+ * @param groupName 群组的名称
  * @param nickName 用户的昵称
  */
-function removeUser(nickName) {
-    const userId = userNickNameCollection.get(nickName);
-    if (!userId) {
+function removeUser(groupName, nickName) {
+    const nickNameMap = userGroup.get(groupName);
+    if (!nickNameMap) {
         return false;
     }
-    userNickNameCollection.delete(nickName);
-    userCollection.delete(userId);
+    const userID = nickNameMap.get(nickName);
+    if (!userID) {
+        return false;
+    }
+    userCollection.delete(userID);
+    nickNameMap.delete(nickName);
     return true;
 }
 exports.removeUser = removeUser;
+;
 /**
  * 添加一个用户,如果已存在用户返回false
  * @param nickName 用户昵称
  * @param auth 用户凭证
  * @param webSocket 用户socket
  */
-function addUser(nickName, auth, webSocket) {
-    if (exports.hasUser(nickName)) {
+function addUser(groupName, nickName, auth, webSocket) {
+    if (hasUser(groupName, nickName)) {
         return false;
     }
-    const userId = nickName + auth;
-    userNickNameCollection.set(nickName, userId);
+    const userId = nickName + auth, nickNameMap = userGroup.get(groupName);
+    nickNameMap.set(nickName, userId);
     userCollection.set(userId, webSocket);
     return true;
 }
 exports.addUser = addUser;
 ;
-function getLiveSockets(nickName) {
+function getOtherPeopleSocket(groupName, nickName) {
     const iterator = userCollection.values();
-    if (!nickName) {
+    if (!nickName && !groupName) {
         return iterator;
     }
-    const userId = userNickNameCollection.get(nickName), userSocket = userCollection.get(userId), result = [], OPENCODE = code_1.ReadyStateConstants['OPEN'];
-    for (const socket of iterator) {
-        if (userSocket !== socket && socket.readyState === OPENCODE) {
-            result.push(socket);
+    const nickNameMap = userGroup.get(groupName), allUsersID = nickNameMap.values(), userID = nickNameMap.get(nickName), result = [];
+    for (const otherUserID of allUsersID) {
+        if (otherUserID !== userID) {
+            result.push(userCollection.get(otherUserID));
         }
     }
     return result;
 }
-exports.getLiveSockets = getLiveSockets;
+exports.getOtherPeopleSocket = getOtherPeopleSocket;
 ;
