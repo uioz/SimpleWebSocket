@@ -52,6 +52,7 @@ export interface standardErrorResponse extends standardResponse {
  * 登录响应类型
  */
 export interface loginResponse extends standardResponse {
+    type:'login';
     auth: string;
 }
 
@@ -60,6 +61,15 @@ export interface loginResponse extends standardResponse {
  */
 export interface messageResponse extends standardResponse {
     type:'message';
+}
+
+/**
+ * 响应错误消息类型
+ */
+export interface messageErrorRespone extends messageResponse {
+    type:'message';
+    result:false;
+    error:string;
 }
 
 // ---------------------- 广播响应类型
@@ -100,3 +110,4 @@ export interface broadCastLoginResponse extends standardBroadCastResponse {
 export interface broadCastLogoutResponse extends standardBroadCastResponse {
     type: 'broadCastLogout';
 }
+

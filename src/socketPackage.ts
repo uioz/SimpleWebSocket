@@ -212,7 +212,7 @@ export class socketPackage  extends SimpleEventEmitter {
      * - 只有登录后这个方法才会真正的发送消息
      * - 
      */
-    public boradCast(message:string):boolean {
+    public broadCast(message:string):boolean {
         
         if(this.state.login){
 

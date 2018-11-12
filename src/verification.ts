@@ -6,6 +6,8 @@ import * as webSocket from "ws";
 
 const dataCompare = new Compare();
 
+const loginExp = /^[^\s][^\s]{0,9}$/;
+
 dataCompare.setStandardCompare('login',{
     type:'string',
     nickName:'string'
@@ -28,6 +30,12 @@ export const paramCheck: routeParamCheckI = {
 
         if(!compareStateCode){
             
+            if (!loginExp.test(request.nickName)) {
+
+                return ErrorCode['login:昵称必须长度在1到10之间的非空白字符串'];
+
+            }
+
             if(hasUser(request.nickName)){
                 return ErrorCode['login:该昵称已经有人使用'];
             }
@@ -49,8 +57,6 @@ export const paramCheck: routeParamCheckI = {
         const compareStateCode = dataCompare.compare('message', request);
 
         if(!compareStateCode){
-
-            const userId = request.nickName+request.auth;
 
             if(!hasUser(request.nickName)){
                 return ErrorCode['system:用户不存在'];

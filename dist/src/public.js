@@ -5,6 +5,98 @@ const dataPersistence_1 = require("./dataPersistence");
 const circlingTask_1 = require("./circlingTask");
 const util_1 = require("util");
 /**
+ * 该类提供相应对象的统一创建
+ */
+class responseFactory {
+    /**
+     * 获取事件戳
+     */
+    static getLocalTime() {
+        return new Date().toLocaleString();
+    }
+    ;
+    /**
+     * 获取响应对象
+     * @param userName 用户昵称
+     * @param time 时间戳
+     */
+    static getBroadCastLoginResponse(userName, time) {
+        return {
+            type: 'broadCastLogin',
+            result: {
+                userName,
+                time: time ? time : this.getLocalTime()
+            }
+        };
+    }
+    ;
+    /**
+     * 获取响应对象
+     * @param userName 用户昵称
+     * @param time 时间戳
+     */
+    static getBroadCastLogoutResponse(userName, time) {
+        return {
+            type: 'broadCastLogout',
+            result: {
+                userName,
+                time: time ? time : this.getLocalTime()
+            }
+        };
+    }
+    ;
+    /**
+     * 获取广播消息对象
+     * @param message 消息字符串
+     * @param userName 用户昵称
+     * @param time 时间戳
+     */
+    static getBroadCastMessageResponse(message, userName, time) {
+        return {
+            type: 'broadCast',
+            result: {
+                userName,
+                message,
+                time: time ? time : this.getLocalTime()
+            }
+        };
+    }
+    ;
+    /**
+     * 获取广播消息正常的对象
+     */
+    static getMessageSuccessResponse() {
+        return {
+            type: 'message',
+            result: true
+        };
+    }
+    ;
+    /**
+     * 获取广播消息异常的对象
+     */
+    static getMessageErrorResponse(errorCode) {
+        return {
+            type: "message",
+            result: false,
+            error: code_1.ErrorCode[errorCode]
+        };
+    }
+    ;
+    /**
+     * 获取登录成功后的响应对象
+     */
+    static getLoginResponse(auth) {
+        return {
+            type: 'login',
+            result: true,
+            auth
+        };
+    }
+    ;
+}
+exports.responseFactory = responseFactory;
+/**
  * 向除了该用户的所有在线的用户广播消息
  * @param nickName 用户昵称
  * @param data 发送的数据
@@ -62,14 +154,7 @@ function closeProcess(errorOrcloseCode, closeCodeReason) {
     const nickName = this.nickName;
     if (dataPersistence_1.hasUser(nickName)) {
         dataPersistence_1.removeUser(nickName);
-        const response = {
-            type: 'broadCastLogout',
-            result: {
-                userName: nickName,
-                time: new Date().toLocaleString()
-            }
-        };
-        broadcast(nickName, response);
+        broadcast(nickName, responseFactory.getBroadCastLogoutResponse(nickName));
         console.log('\n', '---------------closeAndErrorProcess--------------');
         console.log(typeof errorOrcloseCode == 'object' ? `昵称:${nickName}连接错误:` : `昵称:${nickName}通信关闭-关闭代码`, errorOrcloseCode, '\n');
         console.log('-------------closeAndErrorProcessEnd------------', '\n');
@@ -203,16 +288,10 @@ function crashedProcess() {
             if (socket.readyState === 0 || socket.readyState === 1) {
                 continue;
             }
+            console.log('崩溃扫描命中-昵称: ', socket.nickName);
             const nickName = socket.nickName;
             dataPersistence_1.removeUser(nickName);
-            const response = {
-                type: 'broadCastLogout',
-                result: {
-                    userName: nickName,
-                    time: new Date().toLocaleString()
-                }
-            };
-            broadcast(nickName, response);
+            broadcast(nickName, responseFactory.getBroadCastLogoutResponse(nickName));
         }
     });
     Tasks.start();

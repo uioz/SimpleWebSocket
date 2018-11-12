@@ -1,7 +1,7 @@
 import * as WebSocket  from "ws";
+import * as readline from "readline";
 import { router } from "./router";
 import { crashedProcess } from "./public";
-import * as readline from "readline";
 
 let defaultPort: number = 8888;
 let myPort:number;
@@ -39,6 +39,7 @@ if(myPort){
 
 
 function createServer() {
+
     const wss = new WebSocket.Server({
         port: defaultPort
     });
@@ -46,12 +47,17 @@ function createServer() {
     wss.on('connection', router);
 
     wss.on('error', (error) => {
+
         console.error(error);
+
     });
 
     wss.on('listening', () => {
+
         console.log(`WebSocket Server has running in ${defaultPort} port!`);
+        
     });
 
     crashedProcess();
+
 };

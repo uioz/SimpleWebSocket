@@ -4,6 +4,7 @@ const dataPersistence_1 = require("./dataPersistence");
 const code_1 = require("./code");
 const public_1 = require("./public");
 const dataCompare = new public_1.dataCompare();
+const loginExp = /^[^\s][^\s]{0,9}$/;
 dataCompare.setStandardCompare('login', {
     type: 'string',
     nickName: 'string'
@@ -22,6 +23,9 @@ exports.paramCheck = {
         // 获取状态码
         const compareStateCode = dataCompare.compare('login', request);
         if (!compareStateCode) {
+            if (!loginExp.test(request.nickName)) {
+                return code_1.ErrorCode['login:昵称必须长度在1到10之间的非空白字符串'];
+            }
             if (dataPersistence_1.hasUser(request.nickName)) {
                 return code_1.ErrorCode['login:该昵称已经有人使用'];
             }
@@ -38,7 +42,6 @@ exports.paramCheck = {
         // 获取状态码
         const compareStateCode = dataCompare.compare('message', request);
         if (!compareStateCode) {
-            const userId = request.nickName + request.auth;
             if (!dataPersistence_1.hasUser(request.nickName)) {
                 return code_1.ErrorCode['system:用户不存在'];
             }

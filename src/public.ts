@@ -1,9 +1,111 @@
 import * as webSocket from "ws";
-import { standardErrorResponse, standardBroadCastResponse,broadCastLogoutResponse } from "./types";
+import {
+    standardErrorResponse,
+    standardBroadCastResponse,
+    broadCastLogoutResponse,
+    broadCastLoginResponse,
+    broadCastMessageResponse,
+    messageResponse,
+    messageErrorRespone,
+    loginResponse
+} from "./types";
 import { ErrorCode, ErrorType } from "./code";
 import { removeUser, getLiveSockets, hasUser, getUserSocketCollection } from "./dataPersistence";
 import { circlingTask } from "./circlingTask";
 import { isString, isBoolean, isObject, isArray, isNumber } from "util";
+
+/**
+ * 该类提供相应对象的统一创建
+ */
+export class responseFactory {
+
+    /**
+     * 获取事件戳
+     */
+    public static getLocalTime(): string {
+        return new Date().toLocaleString();
+    };
+
+    /**
+     * 获取响应对象
+     * @param userName 用户昵称
+     * @param time 时间戳
+     */
+    public static getBroadCastLoginResponse(userName: string, time?: string): broadCastLoginResponse {
+        return {
+            type: 'broadCastLogin',
+            result: {
+                userName,
+                time: time ? time : this.getLocalTime()
+            }
+        }
+    };
+
+    /**
+     * 获取响应对象
+     * @param userName 用户昵称
+     * @param time 时间戳
+     */
+    public static getBroadCastLogoutResponse(userName: string, time?: string): broadCastLogoutResponse {
+        return {
+            type: 'broadCastLogout',
+            result: {
+                userName,
+                time: time ? time : this.getLocalTime()
+            }
+        }
+    };
+
+    /**
+     * 获取广播消息对象
+     * @param message 消息字符串
+     * @param userName 用户昵称
+     * @param time 时间戳
+     */
+    public static getBroadCastMessageResponse(message: string, userName: string, time?: string): broadCastMessageResponse {
+        return {
+            type: 'broadCast',
+            result: {
+                userName,
+                message,
+                time: time ? time : this.getLocalTime()
+            }
+        }
+    };
+
+    /**
+     * 获取广播消息正常的对象
+     */
+    public static getMessageSuccessResponse(): messageResponse {
+        return {
+            type: 'message',
+            result: true
+        }
+    };
+
+    /**
+     * 获取广播消息异常的对象
+     */
+    public static getMessageErrorResponse(errorCode: number): messageErrorRespone {
+        return {
+            type: "message",
+            result: false,
+            error: ErrorCode[errorCode]
+        }
+    };
+
+    /**
+     * 获取登录成功后的响应对象
+     */
+    public static getLoginResponse(auth: string): loginResponse {
+        return {
+            type: 'login',
+            result: true,
+            auth
+        }
+    };
+
+}
 
 
 /**
@@ -11,7 +113,7 @@ import { isString, isBoolean, isObject, isArray, isNumber } from "util";
  * @param nickName 用户昵称
  * @param data 发送的数据
  */
-export function broadcast(nickName: string, data: standardBroadCastResponse):void {
+export function broadcast(nickName: string, data: standardBroadCastResponse): void {
 
     const sockets = getLiveSockets(nickName);
 
@@ -28,10 +130,10 @@ export function broadcast(nickName: string, data: standardBroadCastResponse):voi
  * @param errorCode 错误代码
  * @param data 输出的数据
  */
-export function logError(errorCode: number, data: any):void {
+export function logError(errorCode: number, data: any): void {
 
-    console.log('\n','----------logError----------');
-    console.log('连接错误原因:', ErrorCode[errorCode],'\n','用户连接源数据:', data);
+    console.log('\n', '----------logError----------');
+    console.log('连接错误原因:', ErrorCode[errorCode], '\n', '用户连接源数据:', data);
     console.log('----------logErrorEnd----------', '\n');
 
 
@@ -42,7 +144,7 @@ export function logError(errorCode: number, data: any):void {
  * @param ws socket对象
  * @param errorCode 错误代码
  */
-export function sendErrorMessage(ws: webSocket, errorcode: number):void {
+export function sendErrorMessage(ws: webSocket, errorcode: number): void {
 
     const errorType = ErrorType[errorcode] ? ErrorType[errorcode] : 'system';
 
@@ -52,9 +154,9 @@ export function sendErrorMessage(ws: webSocket, errorcode: number):void {
         error: ErrorCode[errorcode]
     };
 
-    console.log('\n','-------------sendErrorMessage------------');
-    console.log('连接类型: ',(ws as any).nickName ? `登录用户-昵称:${(ws as any).nickName}` : `未登录用户`,'\n', 'errorCode:', errorcode,'\n','错误详细内容:', ErrorCode[errorcode],'\n','错误结果:', response);
-    console.log( '------------sendErrorMessageEnd-----------', '\n');
+    console.log('\n', '-------------sendErrorMessage------------');
+    console.log('连接类型: ', (ws as any).nickName ? `登录用户-昵称:${(ws as any).nickName}` : `未登录用户`, '\n', 'errorCode:', errorcode, '\n', '错误详细内容:', ErrorCode[errorcode], '\n', '错误结果:', response);
+    console.log('------------sendErrorMessageEnd-----------', '\n');
 
     try {
         ws.send(JSON.stringify(response));
@@ -78,27 +180,19 @@ export function closeProcess(this: webSocket, errorOrcloseCode: object | number,
 
         removeUser(nickName);
 
-        const response: broadCastLogoutResponse = {
-            type:'broadCastLogout',
-            result:{
-                userName:nickName,
-                time:new Date().toLocaleString()
-            }
-        };
+        broadcast(nickName, responseFactory.getBroadCastLogoutResponse(nickName))
 
-        broadcast(nickName,response);
-
-        console.log('\n','---------------closeAndErrorProcess--------------');
+        console.log('\n', '---------------closeAndErrorProcess--------------');
         console.log(typeof errorOrcloseCode == 'object' ? `昵称:${nickName}连接错误:` : `昵称:${nickName}通信关闭-关闭代码`, errorOrcloseCode, '\n');
-        console.log( '-------------closeAndErrorProcessEnd------------', '\n');
-        return ;
+        console.log('-------------closeAndErrorProcessEnd------------', '\n');
+        return;
     }
 
     console.log('\n', '---------------closeAndErrorProcess--------------');
     console.log(typeof errorOrcloseCode == 'object' ? `非法用户连接错误:` : `非法用户通信关闭-关闭代码`, errorOrcloseCode);
     console.log('----------------closeAndErrorProcessEnd------------', '\n');
 
-    return ;
+    return;
 };
 
 type canCompareType = 'string' | 'number' | 'boolean' | 'object' | 'array';
@@ -235,40 +329,34 @@ export class dataCompare {
  * 并且告知其他用户.
  */
 export function crashedProcess() {
-    
-    const 
-    Tasks = new circlingTask(),
-    userSockets = getUserSocketCollection();
+
+    const
+        Tasks = new circlingTask(),
+        userSockets = getUserSocketCollection();
 
     Tasks
-    .setDelayTime(10000)
-    .setTask(()=>{
+        .setDelayTime(10000)
+        .setTask(() => {
 
-        const sockets = userSockets.values();
+            const sockets = userSockets.values();
 
-        for (const socket of sockets) {
-            
-            if (socket.readyState === 0 || socket.readyState === 1 ){
-                continue;
+            for (const socket of sockets) {
+
+                if (socket.readyState === 0 || socket.readyState === 1) {
+                    continue;
+                }
+
+                console.log('崩溃扫描命中-昵称: ',(socket as any).nickName);
+
+                const nickName: string = (socket as any).nickName;
+
+                removeUser(nickName);
+
+                broadcast(nickName, responseFactory.getBroadCastLogoutResponse(nickName));
+
             }
 
-            const nickName: string = (socket as any).nickName;
-
-            removeUser(nickName);
-
-            const response: broadCastLogoutResponse = {
-                type: 'broadCastLogout',
-                result: {
-                    userName: nickName,
-                    time: new Date().toLocaleString()
-                }
-            };
-
-            broadcast(nickName, response);
-
-        }
-
-    });
+        });
 
     Tasks.start();
 

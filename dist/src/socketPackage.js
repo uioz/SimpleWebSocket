@@ -145,7 +145,7 @@ class socketPackage extends simpleEventEmitter_1.SimpleEventEmitter {
      * - 只有登录后这个方法才会真正的发送消息
      * -
      */
-    boradCast(message) {
+    broadCast(message) {
         if (this.state.login) {
             const response = {
                 type: 'message',

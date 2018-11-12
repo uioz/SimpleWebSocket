@@ -10,6 +10,10 @@
 
 <body>
 
+    <div>
+        <input id="input" type="text" style="display:block;width: 100%;" placeholder="输入url 默认ws://127.0.0.1:8888">
+        <input id="button" type="button" value="确认">
+    </div>
 
     <script>
 
@@ -85,7 +89,7 @@
                 batch.call(this, '_event');
                 batch.call(this, '_onceEvent');
             }
-        }
+        };
 
         /**
          * 1. 可用方法
@@ -230,7 +234,7 @@
              * - 只有登录后这个方法才会真正的发送消息
              * -
              */
-            boradCast(message) {
+            broadCast(message) {
                 if (this.state.login) {
                     const response = {
                         type: 'message',
@@ -256,26 +260,39 @@
             }
         };
 
-        const client = new socketPackage('ws://119.29.217.153:4012');
+        const 
+        input = document.getElementById('input'),
+        button = document.getElementById('button');
 
-        client.on('login', (response) => {
-            console.log('login', response);
-        });
+        const defaultUrl = 'ws://127.0.0.1:8888';
 
-        client.on('broadcast', (response) => {
-            console.log('broadcast', response);
-        });
+        let client;
 
-        client.on('error', (error) => {
-            console.log('error', error);
-        });
+        button.addEventListener('click',()=>{
 
-        client.on('requesterror', (error) => {
-            console.log('requestError', error);
-        });
+            const url = input.value || defaultUrl;
+            client = new socketPackage(url);
 
-        client.on('close', (response) => {
-            console.log('close', response);
+            client.on('login', (response) => {
+                console.log('login', response);
+            });
+
+            client.on('broadcast', (response) => {
+                console.log('broadcast', response);
+            });
+
+            client.on('error', (error) => {
+                console.log('error', error);
+            });
+
+            client.on('requesterror', (error) => {
+                console.log('requestError', error);
+            });
+
+            client.on('close', (response) => {
+                console.log('close', response);
+            });
+
         });
 
     </script>

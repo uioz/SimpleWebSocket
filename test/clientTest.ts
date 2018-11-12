@@ -95,7 +95,7 @@ rl.on('line', (line) => {
         case 'broadcast':
             rl.question(`请输入需要广播的信息: \n`, (answer) => {
                 if(answer){
-                    client.boradCast(answer)
+                    client.broadCast(answer)
                 }
                 rl.prompt();
             });

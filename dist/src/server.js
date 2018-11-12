@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const WebSocket = require("ws");
+const readline = require("readline");
 const router_1 = require("./router");
 const public_1 = require("./public");
-const readline = require("readline");
 let defaultPort = 8888;
 let myPort;
 if (myPort) {

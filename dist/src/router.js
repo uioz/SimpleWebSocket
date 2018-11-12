@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const dataPersistence_1 = require("./dataPersistence");
 const verification_1 = require("./verification");
 const public_1 = require("./public");
+const code_1 = require("./code");
 /**
  * 路由
  */
@@ -12,38 +13,16 @@ const route = {
         dataPersistence_1.addUser(nickName, auth, ws);
         // 向socket挂载昵称
         ws.nickName = nickName;
-        const broadCastResponse = {
-            type: 'broadCastLogin',
-            result: {
-                userName: nickName,
-                time: time.toLocaleString(),
-            }
-        };
-        debugger;
-        public_1.broadcast(nickName, broadCastResponse);
-        const response = {
-            type: 'login',
-            result: true,
-            auth: auth
-        };
-        ws.send(JSON.stringify(response));
+        public_1.broadcast(nickName, public_1.responseFactory.getBroadCastLoginResponse(nickName, time.toLocaleString()));
+        ws.send(JSON.stringify(public_1.responseFactory.getLoginResponse(auth)));
     },
     message: (ws, request) => {
         const nickName = request.nickName, message = request.message;
-        const broadCastResponse = {
-            type: 'broadCast',
-            result: {
-                userName: nickName,
-                time: new Date().toLocaleString(),
-                message: message
-            }
-        };
-        public_1.broadcast(nickName, broadCastResponse);
-        const response = {
-            type: 'message',
-            result: true
-        };
-        ws.send(JSON.stringify(response));
+        if (message.length < 1 && message.length > 1024) {
+            return ws.send(JSON.stringify(public_1.responseFactory.getMessageErrorResponse(code_1.ErrorCode['message:消息的长度应该在1到1024个长度之间'])));
+        }
+        public_1.broadcast(nickName, public_1.responseFactory.getBroadCastMessageResponse(message, nickName));
+        ws.send(JSON.stringify(public_1.responseFactory.getMessageSuccessResponse()));
     }
 };
 /**
@@ -65,8 +44,6 @@ function router(ws) {
         }
         return ws.terminate();
     });
-    // TODO 测试不使用bind 的closeProcess是否可以正确执行
-    public_1.closeProcess.bind(ws);
     ws.once('error', public_1.closeProcess);
     ws.once('close', public_1.closeProcess);
 }
