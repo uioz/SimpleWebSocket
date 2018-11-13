@@ -14,15 +14,13 @@ const serverToken:string = userInput.pop();
 if(!serverToken){
     throw new Error('必须有服务器签名用于前后端交互使用!');
 }
-debugger;
 setServerToken(serverToken);
 
 // 设置服务器端口
-const defaultPort: number = parseInt(userInput.shift()) || 8888;
+const defaultPort: number = parseInt(userInput[0]) ? parseInt(userInput.shift()):8888;
 
 // 设置服务器用户组
 const userGroupNames = userInput.length ? userInput : [getDefaultGroupName()];
-debugger;
 setDefaultGroupName(userGroupNames[0]);
 setUserGroup(userGroupNames);
 

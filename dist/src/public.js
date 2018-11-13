@@ -292,7 +292,7 @@ exports.dataCompare = dataCompare;
 function crashedProcess() {
     const Tasks = new circlingTask_1.circlingTask();
     Tasks
-        .setDelayTime(10000)
+        .setDelayTime(15000)
         .setTask(() => {
         const userSockets = dataPersistence_1.getOtherPeopleSocket();
         for (const socket of userSockets) {
@@ -312,5 +312,3 @@ function crashedProcess() {
 }
 exports.crashedProcess = crashedProcess;
 ;
-// TODO 服务器添加口令
-// TODO 服务器添加群组

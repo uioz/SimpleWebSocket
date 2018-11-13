@@ -345,7 +345,7 @@ export function crashedProcess() {
     const Tasks = new circlingTask();   
 
     Tasks
-        .setDelayTime(10000)
+        .setDelayTime(15000)
         .setTask(() => {
 
             const userSockets = getOtherPeopleSocket();
@@ -378,7 +378,3 @@ export function crashedProcess() {
     };
 
 };
-
-// TODO 服务器添加口令
-// TODO 服务器添加群组
-

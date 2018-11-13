@@ -13,13 +13,11 @@ const serverToken = userInput.pop();
 if (!serverToken) {
     throw new Error('必须有服务器签名用于前后端交互使用!');
 }
-debugger;
 dataPersistence_1.setServerToken(serverToken);
 // 设置服务器端口
-const defaultPort = parseInt(userInput.shift()) || 8888;
+const defaultPort = parseInt(userInput[0]) ? parseInt(userInput.shift()) : 8888;
 // 设置服务器用户组
 const userGroupNames = userInput.length ? userInput : [dataPersistence_1.getDefaultGroupName()];
-debugger;
 dataPersistence_1.setDefaultGroupName(userGroupNames[0]);
 dataPersistence_1.setUserGroup(userGroupNames);
 const wss = new WebSocket.Server({

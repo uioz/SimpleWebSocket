@@ -98,8 +98,8 @@ export function removeUser(groupName:string,nickName: string): boolean {
         return false;
     }
 
-    userCollection.delete(userID);
-    nickNameMap.delete(nickName);
+    userCollection.delete(userID)
+    nickNameMap.delete(nickName)
     
     return true;
 
