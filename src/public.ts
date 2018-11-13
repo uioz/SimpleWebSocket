@@ -10,9 +10,23 @@ import {
     loginResponse
 } from "./types";
 import { ErrorCode, ErrorType } from "./code";
-import { removeUser, getOtherPeopleSocket, hasUser, getUserSocketCollection } from "./dataPersistence";
+import { removeUser, getOtherPeopleSocket, hasUser } from "./dataPersistence";
 import { circlingTask } from "./circlingTask";
 import { isString, isBoolean, isObject, isArray, isNumber } from "util";
+
+
+/**
+ * 使用给定的socket发送消息,内部使用tryCatch以防止信道关闭的时候没有对应的响应
+ * @param ws webSocket对象
+ * @param data 要发送的json数据
+ */
+export function send(ws:webSocket,data:object) {
+    try {
+        ws.send(JSON.stringify(data))
+    } catch (error) {
+        ws.terminate();
+    }
+};
 
 /**
  * 该类提供相应对象的统一创建
@@ -86,22 +100,24 @@ export class responseFactory {
     /**
      * 获取广播消息异常的对象
      */
-    public static getMessageErrorResponse(errorCode: number): messageErrorRespone {
+    public static getMessageErrorResponse(errorTypeCode: number): messageErrorRespone {
         return {
             type: "message",
             result: false,
-            error: ErrorCode[errorCode]
+            error: ErrorType[errorTypeCode]
         }
     };
 
     /**
      * 获取登录成功后的响应对象
      */
-    public static getLoginResponse(auth: string): loginResponse {
+    public static getLoginResponse(auth: string,groupName:string,allGroups:string[]): loginResponse {
         return {
             type: 'login',
             result: true,
-            auth
+            auth,
+            groupName,
+            allGroups
         }
     };
 
@@ -110,16 +126,19 @@ export class responseFactory {
 
 /**
  * 向除了该用户的所有在线的用户广播消息
+ * @param groupName 用户所在的群组
  * @param nickName 用户昵称
  * @param data 发送的数据
  */
-export function broadcast(nickName: string, data: standardBroadCastResponse): void {
+export function broadcast(groupName:string,nickName: string, data: standardBroadCastResponse): void {
 
-    const sockets = getOtherPeopleSocket(nickName);
+    // 获取用户所在的群组中的其他socket
 
-    for (const socket of sockets) {
+    const otherUserSockets = getOtherPeopleSocket(groupName,nickName);
 
-        socket.send(JSON.stringify(data));
+    for (const otherUserSocket of otherUserSockets) {
+        
+        send(otherUserSocket,data);
 
     }
 
@@ -146,23 +165,16 @@ export function logError(errorCode: number, data: any): void {
  */
 export function sendErrorMessage(ws: webSocket, errorcode: number): void {
 
-    const errorType = ErrorType[errorcode] ? ErrorType[errorcode] : 'system';
-
-    const response: standardErrorResponse = {
-        type: errorType,
-        result: false,
-        error: ErrorCode[errorcode]
-    };
+    const 
+    errorType = ErrorType[errorcode] ? ErrorType[errorcode] : 'system',
+    response: standardErrorResponse = responseFactory.getMessageErrorResponse(errorType);
 
     console.log('\n', '-------------sendErrorMessage------------');
     console.log('连接类型: ', (ws as any).nickName ? `登录用户-昵称:${(ws as any).nickName}` : `未登录用户`, '\n', 'errorCode:', errorcode, '\n', '错误详细内容:', ErrorCode[errorcode], '\n', '错误结果:', response);
     console.log('------------sendErrorMessageEnd-----------', '\n');
-
-    try {
-        ws.send(JSON.stringify(response));
-    } catch (error) {
-
-    }
+    
+    send(ws,response);
+    
 };
 
 /**
@@ -182,7 +194,7 @@ export function closeProcess(this: webSocket, errorOrcloseCode: object | number,
 
         removeUser(groupName,nickName);
 
-        broadcast(nickName, responseFactory.getBroadCastLogoutResponse(nickName))
+        broadcast(groupName,nickName, responseFactory.getBroadCastLogoutResponse(nickName))
 
         console.log('\n', '---------------closeAndErrorProcess--------------');
         console.log(typeof errorOrcloseCode == 'object' ? `昵称:${nickName}连接错误:` : `昵称:${nickName}通信关闭-关闭代码`, errorOrcloseCode, '\n');
@@ -332,21 +344,20 @@ export class dataCompare {
  */
 export function crashedProcess() {
 
-    const
-        Tasks = new circlingTask(),
-        userSockets = getUserSocketCollection();
+    const Tasks = new circlingTask();   
 
     Tasks
         .setDelayTime(10000)
         .setTask(() => {
 
-            const sockets = userSockets.values();
+            const userSockets = getOtherPeopleSocket();
 
-            for (const socket of sockets) {
+            for (const socket of userSockets) {
 
                 if (socket.readyState === 0 || socket.readyState === 1) {
                     continue;
                 }
+                
                 const nickName: string = (socket as any).nickName,
                       groupName:string = (socket as any).groupName;
 
@@ -354,7 +365,7 @@ export function crashedProcess() {
 
                 removeUser(groupName,nickName);
 
-                broadcast(nickName, responseFactory.getBroadCastLogoutResponse(nickName));
+                broadcast(groupName,nickName, responseFactory.getBroadCastLogoutResponse(nickName));
 
             }
 
@@ -371,5 +382,5 @@ export function crashedProcess() {
 };
 
 // TODO 服务器添加口令
-// TODO 服务器添加群众
+// TODO 服务器添加群组
 

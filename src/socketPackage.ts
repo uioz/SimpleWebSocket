@@ -1,5 +1,5 @@
 import { SimpleEventEmitter } from "./simpleEventEmitter";
-import { requestLoginType,standardRequest,requestMessageType } from "./types";
+import { requestLoginType, standardRequest, requestMessageType, loginResponse } from "./types";
 import * as WebSocket from "ws";
 
 /**
@@ -37,7 +37,39 @@ interface lister {
  * - broadcast 由服务器向客户端广播的信息都会触发这个事件
  * - login 调用connect方法后登录成功会触发这个事件
  */
-export class socketPackage  extends SimpleEventEmitter {
+export class socketPackage extends SimpleEventEmitter {
+
+    /**
+     * 获取登录类型对象
+     * @param nickName 用户昵称
+     * @param token 服务器id
+     */
+    private static getLoingRequest(nickName:string,token:string):requestLoginType{
+        return {
+            type: 'login',
+            nickName,
+            token
+        }
+    };
+
+    /**
+     * 获取发送消息对象
+     * @param message 发送的消息
+     * @param nickName 用户昵称
+     * @param token 服务器签名
+     * @param auth 用户凭证
+     * @param groupName 要发送的群组
+     */
+    private static getRequestMessage(message:string,nickName: string, token: string,auth:string,groupName:string): requestMessageType{
+        return {
+            type:'message',
+            token,
+            nickName,
+            auth,
+            groupName,
+            message
+        }
+    }
 
     /**
      * 保存远程主机的地址
@@ -45,7 +77,11 @@ export class socketPackage  extends SimpleEventEmitter {
     private url: string = '';
     private webScoket: WebSocket;
     private nickName: string;
-    private auth:string;
+    private auth: string;
+
+    private token: string;
+    private groupName: string;
+    private allGroups: string[];
 
     /**
      * 保存客户端状态
@@ -57,39 +93,53 @@ export class socketPackage  extends SimpleEventEmitter {
     };
 
     /**
+     * 创建一个客户端实例,如果指定了昵称则创建后就立即连接
+     * 
+     * @param url 服务器地址
+     * @param token 服务器签名
+     * @param nickName 昵称
+     */
+    constructor(url: string, token: string, nickName?: string) {
+
+        super();
+
+        this.url = url;
+        this.token = token;
+
+        if (nickName) {
+            this.connect(nickName);
+        }
+
+    };
+
+    /**
      * 调用后将对象转为JSON使用websocket.send方法发送
      * @param data 需要发送的数据
      */
-    private send(data: standardRequest):void{
+    private send(data: standardRequest): void {
         this.webScoket.send(JSON.stringify(data));
     }
 
 
     private openListener = () => {
 
-        this.state.connect =true;
+        this.state.connect = true;
 
-        if(!this.state.login){
-
-            const requset:requestLoginType = {
-                type:'login',
-                nickName:this.nickName
-            };
-
-            this.send(requset);
+        if (!this.state.login) {
+            this.send(socketPackage.getLoingRequest(this.nickName,this.token));
         }
-        
+
     }
 
     private closeListener = (event) => {
 
         this.terminate();
-        this.emit('close',event);
+        this.emit('close', event);
     }
 
     private errorListener = (event) => {
 
-        if(this.state.tryError){
+        if (this.state.tryError) {
             return;
         }
         this.emit('error', event);
@@ -100,43 +150,32 @@ export class socketPackage  extends SimpleEventEmitter {
     private messageListener = (event) => {
 
         const response = JSON.parse(event.data);
-        
-        if(response.type == 'login' && response.result){
+
+        if (response.type == 'login' && response.result) {
+
             this.auth = response.auth;
+            this.groupName = response.groupName;
+
             this.state.login = true;
-            this.emit('login',response);
+
+            this.emit('login', response);
+
             return;
         }
 
         // 如果result返回false意味着此时服务器已经关闭了连接
-        if(!response.result){
+        if (!response.result) {
+
             this.terminate();
-            this.emit('requesterror',response);
+            this.emit('requesterror', response);
+
             return;
         }
 
         // 剩下的都是广播事件
-        this.emit('broadcast',response);
-        
+        this.emit('broadcast', response);
+
     }
-
-    /**
-     * 创建一个客户端实例,如果指定了昵称则创建后就立即连接
-     * 
-     * @param url 服务器地址
-     * @param nickName 昵称
-     */
-    constructor(url: string, nickName?: string) {
-
-        super();
-
-        this.url = url;
-
-        if (nickName) {
-            this.connect(nickName);
-        }
-
-    };
 
     /**
      * 调用后给内部的websocket添加监听
@@ -172,7 +211,8 @@ export class socketPackage  extends SimpleEventEmitter {
         this.webScoket = null;
         this.state.login = this.state.connect = this.state.tryError = false;
 
-    }
+    };
+
 
     /**
      * 调用后连接服务器,如果已经存在连接则彻底断开连接后再次连接
@@ -192,11 +232,11 @@ export class socketPackage  extends SimpleEventEmitter {
 
         }
 
-        if(nickName){
+        if (nickName) {
             this.nickName = nickName;
         }
 
-        if(!this.nickName){
+        if (!this.nickName) {
             throw new Error('内部没有昵称,可以在connect方法或者新建实例的时候传入');
         }
 
@@ -212,18 +252,11 @@ export class socketPackage  extends SimpleEventEmitter {
      * - 只有登录后这个方法才会真正的发送消息
      * - 
      */
-    public broadCast(message:string):boolean {
-        
-        if(this.state.login){
+    public broadCast(message: string): boolean {
 
-            const response: requestMessageType = {
-                type:'message',
-                auth:this.auth,
-                nickName:this.nickName,
-                message:message.toString()
-            }
-
-            this.send(response);
+        if (this.state.login) {
+    
+            this.send(socketPackage.getRequestMessage(message, this.nickName, this.token, this.auth, this.groupName));
 
             return true;
         }
@@ -237,9 +270,9 @@ export class socketPackage  extends SimpleEventEmitter {
      * 
      * - 如果没有连接或者没有登录则该方法无效
      */
-    public close():void{
+    public close(): void {
 
-        if(this.webScoket && this.state.login){
+        if (this.webScoket && this.state.login) {
             this.webScoket.close();
             this.terminate();
         }

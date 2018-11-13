@@ -13,6 +13,7 @@ dataCompare.setStandardCompare('login',{
     nickName:'string',
     token:'string'
 });
+
 dataCompare.setStandardCompare('message',{
     type:'string',
     nickName:'string',
@@ -50,11 +51,11 @@ export const paramCheck: routeParamCheckI = {
 
             }else{
 
-                groupName = getDefaultGroupName();
+                request.groupName = getDefaultGroupName();
 
             }
 
-            if(hasUser(groupName,request.nickName)){
+            if (hasUser(request.groupName,request.nickName)){
 
                 return ErrorCode['login:该昵称已经有人使用'];
                 
@@ -73,7 +74,7 @@ export const paramCheck: routeParamCheckI = {
         }
 
     },
-    message(request: requestMessageType,webSocket) {
+    message(request: requestMessageType) {
 
         // 获取状态码
         const compareStateCode = dataCompare.compare('message', request);
@@ -82,8 +83,9 @@ export const paramCheck: routeParamCheckI = {
 
             const 
             nickName = request.nickName,
-            groupName = (webSocket as any).groupName;
+            groupName = request.groupName;
 
+            // 如果是非法请求模拟的message,即使不存在这个Group也返回用户不存在
             if(!hasUser(groupName,nickName)){
                 return ErrorCode['system:用户不存在'];
             }

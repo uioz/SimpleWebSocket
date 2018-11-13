@@ -18,20 +18,51 @@ export function setDefaultGroupName(newName:string) {
     defaultGroupName = newName;
 };
 
+/**
+ * 获取内置的用户组名称
+ */
 export function getDefaultGroupName() {
     return defaultGroupName;
 };
 
+/**
+ * 查看当前用户组集合中是否存在指定名称的用户组
+ * @param name 用户组名称
+ */
 export function hasGroupName(name:string) {
     return userGroup.has(name);
 };
 
+/**
+ * 使用给定的用户组名称来创建多个用户组
+ * @param groupNames 有字符串组成的用户组
+ */
+export function setUserGroup(groupNames: string[]) {
+    for (const name of groupNames) {
+        userGroup.set(name, new Map());
+    }
+};
+
+/**
+ * 获取当前存在的用户组
+ */
+export function getUserGroupNames():string[]{
+    return Array.from(userGroup.keys());
+}
+
 let serverToken = '';
 
+/**
+ * 向服务器设置一个签名用于请求时候的验证
+ * @param newName 设置一个服务器签名
+ */
 export function setServerToken(newName: string) {
     serverToken = newName;
 };
 
+/**
+ * 获取服务器内部的签名
+ */
 export function getServerToken() {
     return serverToken;
 };
@@ -47,19 +78,6 @@ export function hasUser(groupName: string, nickName: string): boolean {
 
     return userGroup.get(groupName).has(nickName);
 }
-
-/**
- * 使用给定的用户组名称来创建多个用户组
- * @param groupNames 有字符串组成的用户组
- */
-export function setUserGroup(groupNames:string[]) {
-    for (const name of groupNames) {
-        userGroup.set(name,new Map());
-    }
-};
-
-
-
 
 /**
  * 删除指定群组的指定昵称的用户
@@ -120,10 +138,8 @@ export function getOtherPeopleSocket(): IterableIterator<WebSocket>;
 export function getOtherPeopleSocket(groupName:string,nickName: string): Array<WebSocket>;
 export function getOtherPeopleSocket(groupName?:string,nickName?: string) {
 
-    const iterator = userCollection.values();
-
     if (!nickName && !groupName) {
-        return iterator;
+        return userCollection.values()
     }
 
     const 

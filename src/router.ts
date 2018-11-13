@@ -4,9 +4,9 @@ import {
     requestLoginType,
     requestMessageType,
 } from "./types";
-import { addUser } from "./dataPersistence";
+import { addUser,getUserGroupNames } from "./dataPersistence";
 import { checkAndFormat } from "./verification";
-import { closeProcess, broadcast,responseFactory } from "./public";
+import { closeProcess, broadcast,responseFactory,send } from "./public";
 import { ErrorCode } from "./code";
 
 /**
@@ -18,32 +18,38 @@ const route: routeI = {
         const
             time = new Date(),
             auth = time.getTime().toString(32),
-            nickName = request.nickName;
-
-        addUser(nickName, auth, ws);
+            nickName = request.nickName,
+            groupName = request.groupName;
+        
+        addUser(groupName,nickName, auth, ws);
 
         // 向socket挂载昵称
-        (ws as any).nickName = nickName
+        (ws as any).nickName = nickName;
+        // 向socket挂载群组
+        (ws as any).groupName = groupName;
 
-        broadcast(nickName,responseFactory.getBroadCastLoginResponse(nickName,time.toLocaleString()));
-        ws.send(JSON.stringify(responseFactory.getLoginResponse(auth)));
+        broadcast(groupName,nickName,responseFactory.getBroadCastLoginResponse(nickName,time.toLocaleString()));
+
+        send(ws, responseFactory.getLoginResponse(auth, groupName, getUserGroupNames()));
 
     },
     message: (ws: webSocket, request: requestMessageType) => {
 
         const
             nickName = request.nickName,
-            message = request.message;
+            message = request.message,
+            groupName = request.groupName;
         
         if(message.length < 1 && message.length > 1024){
 
-            return ws.send(JSON.stringify(responseFactory.getMessageErrorResponse(ErrorCode['message:消息的长度应该在1到1024个长度之间'])));
+            return send(ws,responseFactory.getMessageErrorResponse(ErrorCode['message:消息的长度应该在1到1024个长度之间']));
 
         }
 
-        broadcast(nickName,responseFactory.getBroadCastMessageResponse(message,nickName));
-        ws.send(JSON.stringify(responseFactory.getMessageSuccessResponse()));
-        
+        broadcast(groupName,nickName,responseFactory.getBroadCastMessageResponse(message,nickName));
+
+        send(ws,responseFactory.getMessageSuccessResponse());
+
     }
 };
 

@@ -36,13 +36,16 @@ export interface requestLoginType extends standardRequest {
  * 定义客户端消息发送事件
  */
 export interface requestMessageType extends standardRequest {
+    type:'message';
     auth:string;
     message:string;
+    groupName: string;
 }
 
 // --------------------- 响应格式
 
-export interface standardResponse extends standardRequest {
+export interface standardResponse {
+    type: string;
     result:boolean;
 }
 
