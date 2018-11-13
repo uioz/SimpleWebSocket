@@ -18,7 +18,7 @@ const rl = readline.createInterface({
 });
 rl.prompt();
 function runClient() {
-    const client = new socketPackage_1.socketPackage(url, nickName);
+    const client = new socketPackage_1.socketPackage(url, '', nickName);
     client.on('login', (response) => {
         console.log('login', response);
     });

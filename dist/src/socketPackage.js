@@ -21,9 +21,10 @@ class socketPackage extends simpleEventEmitter_1.SimpleEventEmitter {
      * 创建一个客户端实例,如果指定了昵称则创建后就立即连接
      *
      * @param url 服务器地址
+     * @param token 服务器签名
      * @param nickName 昵称
      */
-    constructor(url, nickName) {
+    constructor(url, token, nickName) {
         super();
         /**
          * 保存远程主机的地址
@@ -40,11 +41,7 @@ class socketPackage extends simpleEventEmitter_1.SimpleEventEmitter {
         this.openListener = () => {
             this.state.connect = true;
             if (!this.state.login) {
-                const requset = {
-                    type: 'login',
-                    nickName: this.nickName
-                };
-                this.send(requset);
+                this.send(socketPackage.getLoingRequest(this.nickName, this.token));
             }
         };
         this.closeListener = (event) => {
@@ -62,6 +59,7 @@ class socketPackage extends simpleEventEmitter_1.SimpleEventEmitter {
             const response = JSON.parse(event.data);
             if (response.type == 'login' && response.result) {
                 this.auth = response.auth;
+                this.groupName = response.groupName;
                 this.state.login = true;
                 this.emit('login', response);
                 return;
@@ -76,10 +74,43 @@ class socketPackage extends simpleEventEmitter_1.SimpleEventEmitter {
             this.emit('broadcast', response);
         };
         this.url = url;
+        this.token = token;
         if (nickName) {
             this.connect(nickName);
         }
     }
+    /**
+     * 获取登录类型对象
+     * @param nickName 用户昵称
+     * @param token 服务器id
+     */
+    static getLoingRequest(nickName, token) {
+        return {
+            type: 'login',
+            nickName,
+            token
+        };
+    }
+    ;
+    /**
+     * 获取发送消息对象
+     * @param message 发送的消息
+     * @param nickName 用户昵称
+     * @param token 服务器签名
+     * @param auth 用户凭证
+     * @param groupName 要发送的群组
+     */
+    static getRequestMessage(message, nickName, token, auth, groupName) {
+        return {
+            type: 'message',
+            token,
+            nickName,
+            auth,
+            groupName,
+            message
+        };
+    }
+    ;
     /**
      * 调用后将对象转为JSON使用websocket.send方法发送
      * @param data 需要发送的数据
@@ -87,7 +118,6 @@ class socketPackage extends simpleEventEmitter_1.SimpleEventEmitter {
     send(data) {
         this.webScoket.send(JSON.stringify(data));
     }
-    ;
     /**
      * 调用后给内部的websocket添加监听
      */
@@ -118,6 +148,7 @@ class socketPackage extends simpleEventEmitter_1.SimpleEventEmitter {
         this.webScoket = null;
         this.state.login = this.state.connect = this.state.tryError = false;
     }
+    ;
     /**
      * 调用后连接服务器,如果已经存在连接则彻底断开连接后再次连接
      */
@@ -147,13 +178,7 @@ class socketPackage extends simpleEventEmitter_1.SimpleEventEmitter {
      */
     broadCast(message) {
         if (this.state.login) {
-            const response = {
-                type: 'message',
-                auth: this.auth,
-                nickName: this.nickName,
-                message: message.toString()
-            };
-            this.send(response);
+            this.send(socketPackage.getRequestMessage(message, this.nickName, this.token, this.auth, this.groupName));
             return true;
         }
         return false;

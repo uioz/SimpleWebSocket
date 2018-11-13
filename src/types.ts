@@ -73,8 +73,8 @@ export interface messageResponse extends standardResponse {
 /**
  * 响应错误消息类型
  */
-export interface messageErrorRespone extends messageResponse {
-    type:'message';
+export interface errorRespone extends standardErrorResponse {
+    type:string;
     result:false;
     error:string;
 }

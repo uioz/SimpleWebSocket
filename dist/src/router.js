@@ -9,20 +9,22 @@ const code_1 = require("./code");
  */
 const route = {
     login: (ws, request) => {
-        const time = new Date(), auth = time.getTime().toString(32), nickName = request.nickName;
-        dataPersistence_1.addUser(nickName, auth, ws);
+        const time = new Date(), auth = time.getTime().toString(32), nickName = request.nickName, groupName = request.groupName;
+        dataPersistence_1.addUser(groupName, nickName, auth, ws);
         // 向socket挂载昵称
         ws.nickName = nickName;
-        public_1.broadcast(nickName, public_1.responseFactory.getBroadCastLoginResponse(nickName, time.toLocaleString()));
-        ws.send(JSON.stringify(public_1.responseFactory.getLoginResponse(auth)));
+        // 向socket挂载群组
+        ws.groupName = groupName;
+        public_1.broadcast(groupName, nickName, public_1.responseFactory.getBroadCastLoginResponse(nickName, time.toLocaleString()));
+        public_1.send(ws, public_1.responseFactory.getLoginResponse(auth, groupName, dataPersistence_1.getUserGroupNames()));
     },
     message: (ws, request) => {
-        const nickName = request.nickName, message = request.message;
+        const nickName = request.nickName, message = request.message, groupName = request.groupName;
         if (message.length < 1 && message.length > 1024) {
-            return ws.send(JSON.stringify(public_1.responseFactory.getMessageErrorResponse(code_1.ErrorCode['message:消息的长度应该在1到1024个长度之间'])));
+            return public_1.send(ws, public_1.responseFactory.getMessageErrorResponse(code_1.ErrorCode['message:消息的长度应该在1到1024个长度之间']));
         }
-        public_1.broadcast(nickName, public_1.responseFactory.getBroadCastMessageResponse(message, nickName));
-        ws.send(JSON.stringify(public_1.responseFactory.getMessageSuccessResponse()));
+        public_1.broadcast(groupName, nickName, public_1.responseFactory.getBroadCastMessageResponse(message, nickName));
+        public_1.send(ws, public_1.responseFactory.getMessageSuccessResponse());
     }
 };
 /**

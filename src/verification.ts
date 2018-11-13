@@ -135,7 +135,7 @@ export function formatUserData(userData: string): standardRequest | number {
 function autoFirewall(request: requestLoginType): number | true {
 
     if (request.token !== getServerToken()) {
-        return ErrorCode['system:请求参数错误'];
+        return ErrorCode['error:没有Token'];
     }
 
     return true;

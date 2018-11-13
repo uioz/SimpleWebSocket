@@ -16,22 +16,54 @@ function setDefaultGroupName(newName) {
 }
 exports.setDefaultGroupName = setDefaultGroupName;
 ;
+/**
+ * 获取内置的用户组名称
+ */
 function getDefaultGroupName() {
     return defaultGroupName;
 }
 exports.getDefaultGroupName = getDefaultGroupName;
 ;
+/**
+ * 查看当前用户组集合中是否存在指定名称的用户组
+ * @param name 用户组名称
+ */
 function hasGroupName(name) {
     return userGroup.has(name);
 }
 exports.hasGroupName = hasGroupName;
 ;
+/**
+ * 使用给定的用户组名称来创建多个用户组
+ * @param groupNames 有字符串组成的用户组
+ */
+function setUserGroup(groupNames) {
+    for (const name of groupNames) {
+        userGroup.set(name, new Map());
+    }
+}
+exports.setUserGroup = setUserGroup;
+;
+/**
+ * 获取当前存在的用户组
+ */
+function getUserGroupNames() {
+    return Array.from(userGroup.keys());
+}
+exports.getUserGroupNames = getUserGroupNames;
 let serverToken = '';
+/**
+ * 向服务器设置一个签名用于请求时候的验证
+ * @param newName 设置一个服务器签名
+ */
 function setServerToken(newName) {
     serverToken = newName;
 }
 exports.setServerToken = setServerToken;
 ;
+/**
+ * 获取服务器内部的签名
+ */
 function getServerToken() {
     return serverToken;
 }
@@ -46,17 +78,6 @@ function hasUser(groupName, nickName) {
     return userGroup.get(groupName).has(nickName);
 }
 exports.hasUser = hasUser;
-/**
- * 使用给定的用户组名称来创建多个用户组
- * @param groupNames 有字符串组成的用户组
- */
-function setUserGroup(groupNames) {
-    for (const name of groupNames) {
-        userGroup.set(name, new Map());
-    }
-}
-exports.setUserGroup = setUserGroup;
-;
 /**
  * 删除指定群组的指定昵称的用户
  * @param groupName 群组的名称
@@ -95,9 +116,8 @@ function addUser(groupName, nickName, auth, webSocket) {
 exports.addUser = addUser;
 ;
 function getOtherPeopleSocket(groupName, nickName) {
-    const iterator = userCollection.values();
     if (!nickName && !groupName) {
-        return iterator;
+        return userCollection.values();
     }
     const nickNameMap = userGroup.get(groupName), allUsersID = nickNameMap.values(), userID = nickNameMap.get(nickName), result = [];
     for (const otherUserID of allUsersID) {

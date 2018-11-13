@@ -34,9 +34,9 @@ exports.paramCheck = {
                 }
             }
             else {
-                groupName = dataPersistence_1.getDefaultGroupName();
+                request.groupName = dataPersistence_1.getDefaultGroupName();
             }
-            if (dataPersistence_1.hasUser(groupName, request.nickName)) {
+            if (dataPersistence_1.hasUser(request.groupName, request.nickName)) {
                 return code_1.ErrorCode['login:该昵称已经有人使用'];
             }
             return true;
@@ -48,11 +48,12 @@ exports.paramCheck = {
             return code_1.ErrorCode['system:请求参数错误'];
         }
     },
-    message(request, webSocket) {
+    message(request) {
         // 获取状态码
         const compareStateCode = dataCompare.compare('message', request);
         if (!compareStateCode) {
-            const nickName = request.nickName, groupName = webSocket.groupName;
+            const nickName = request.nickName, groupName = request.groupName;
+            // 如果是非法请求模拟的message,即使不存在这个Group也返回用户不存在
             if (!dataPersistence_1.hasUser(groupName, nickName)) {
                 return code_1.ErrorCode['system:用户不存在'];
             }
@@ -90,7 +91,7 @@ exports.formatUserData = formatUserData;
  */
 function autoFirewall(request) {
     if (request.token !== dataPersistence_1.getServerToken()) {
-        return code_1.ErrorCode['system:请求参数错误'];
+        return code_1.ErrorCode['error:没有Token'];
     }
     return true;
 }

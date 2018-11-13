@@ -12,10 +12,10 @@ export enum ErrorCode {
     'message:消息的长度应该在1到1024个长度之间' = 22,
     'system:用户不存在' = 100,
     'system:群组不存在' = 101,
+    'error:没有Token' = 102,
     'error:数据格式化错误' = 200,
     'error:没有对应的检测器' = 201,
     'error:数据校检错误' = 202,
-    'error:没有Token' = 203
 };
 
 /**
@@ -25,9 +25,16 @@ export const ErrorType = {
     10:'system',
     11:'login',
     12:'login',
-    13:'message',
-    14:'message',
-    100:'system'
+    13:'login',
+    20:'message',
+    21:'message',
+    22:'message',
+    100:'system',
+    101:'system',
+    102:'system',
+    200:'error',
+    201:'error',
+    202:'error',
 }
 
 /**

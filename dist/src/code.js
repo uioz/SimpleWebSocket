@@ -14,10 +14,10 @@ var ErrorCode;
     ErrorCode[ErrorCode["message:\u6D88\u606F\u7684\u957F\u5EA6\u5E94\u8BE5\u57281\u52301024\u4E2A\u957F\u5EA6\u4E4B\u95F4"] = 22] = "message:\u6D88\u606F\u7684\u957F\u5EA6\u5E94\u8BE5\u57281\u52301024\u4E2A\u957F\u5EA6\u4E4B\u95F4";
     ErrorCode[ErrorCode["system:\u7528\u6237\u4E0D\u5B58\u5728"] = 100] = "system:\u7528\u6237\u4E0D\u5B58\u5728";
     ErrorCode[ErrorCode["system:\u7FA4\u7EC4\u4E0D\u5B58\u5728"] = 101] = "system:\u7FA4\u7EC4\u4E0D\u5B58\u5728";
+    ErrorCode[ErrorCode["error:\u6CA1\u6709Token"] = 102] = "error:\u6CA1\u6709Token";
     ErrorCode[ErrorCode["error:\u6570\u636E\u683C\u5F0F\u5316\u9519\u8BEF"] = 200] = "error:\u6570\u636E\u683C\u5F0F\u5316\u9519\u8BEF";
     ErrorCode[ErrorCode["error:\u6CA1\u6709\u5BF9\u5E94\u7684\u68C0\u6D4B\u5668"] = 201] = "error:\u6CA1\u6709\u5BF9\u5E94\u7684\u68C0\u6D4B\u5668";
     ErrorCode[ErrorCode["error:\u6570\u636E\u6821\u68C0\u9519\u8BEF"] = 202] = "error:\u6570\u636E\u6821\u68C0\u9519\u8BEF";
-    ErrorCode[ErrorCode["error:\u6CA1\u6709Token"] = 203] = "error:\u6CA1\u6709Token";
 })(ErrorCode = exports.ErrorCode || (exports.ErrorCode = {}));
 ;
 /**
@@ -27,9 +27,16 @@ exports.ErrorType = {
     10: 'system',
     11: 'login',
     12: 'login',
-    13: 'message',
-    14: 'message',
-    100: 'system'
+    13: 'login',
+    20: 'message',
+    21: 'message',
+    22: 'message',
+    100: 'system',
+    101: 'system',
+    102: 'system',
+    200: 'error',
+    201: 'error',
+    202: 'error',
 };
 /**
  * 定义连接状态描述符号

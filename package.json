@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "watch": "tsc -p ./tsconfig.json",
-    "server": "node ./dist/src/server.js",
+    "server": "node ./dist/src/server.js helloworld",
     "client": "node ./dist/test/clientTest.js",
-    "serverdebug":"node --inspect --inspect-brk ./dist/src/server.js",
+    "serverdebug":"node --inspect --inspect-brk ./dist/src/server.js helloworld",
     "clientdebug":"node --inspect --inspect-brk ./dist/test/clientTest.js"
   },
   "author": "",

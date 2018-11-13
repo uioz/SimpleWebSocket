@@ -6,11 +6,11 @@ import {
     broadCastLoginResponse,
     broadCastMessageResponse,
     messageResponse,
-    messageErrorRespone,
-    loginResponse
+    loginResponse,
+    errorRespone
 } from "./types";
 import { ErrorCode, ErrorType } from "./code";
-import { removeUser, getOtherPeopleSocket, hasUser } from "./dataPersistence";
+import { removeUser, getOtherPeopleSocket, hasUser, getDefaultGroupName } from "./dataPersistence";
 import { circlingTask } from "./circlingTask";
 import { isString, isBoolean, isObject, isArray, isNumber } from "util";
 
@@ -100,11 +100,11 @@ export class responseFactory {
     /**
      * 获取广播消息异常的对象
      */
-    public static getMessageErrorResponse(errorTypeCode: number): messageErrorRespone {
+    public static getMessageErrorResponse(errorTypeCode: number): errorRespone {
         return {
-            type: "message",
+            type: ErrorType[errorTypeCode],
             result: false,
-            error: ErrorType[errorTypeCode]
+            error: ErrorCode[errorTypeCode]
         }
     };
 
@@ -165,9 +165,7 @@ export function logError(errorCode: number, data: any): void {
  */
 export function sendErrorMessage(ws: webSocket, errorcode: number): void {
 
-    const 
-    errorType = ErrorType[errorcode] ? ErrorType[errorcode] : 'system',
-    response: standardErrorResponse = responseFactory.getMessageErrorResponse(errorType);
+    const response: standardErrorResponse = responseFactory.getMessageErrorResponse(errorcode);
 
     console.log('\n', '-------------sendErrorMessage------------');
     console.log('连接类型: ', (ws as any).nickName ? `登录用户-昵称:${(ws as any).nickName}` : `未登录用户`, '\n', 'errorCode:', errorcode, '\n', '错误详细内容:', ErrorCode[errorcode], '\n', '错误结果:', response);
@@ -188,7 +186,7 @@ export function closeProcess(this: webSocket, errorOrcloseCode: object | number,
 
     const 
     nickName: string = (this as any).nickName,
-    groupName:string = (this as any).nickName;
+    groupName: string = (this as any).groupName?(this as any).groupName:getDefaultGroupName();
 
     if (hasUser(groupName,nickName)) {
 
