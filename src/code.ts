@@ -12,7 +12,7 @@ export enum ErrorCode {
     'message:消息的长度应该在1到1024个长度之间' = 22,
     'system:用户不存在' = 100,
     'system:群组不存在' = 101,
-    'error:没有Token' = 102,
+    'error:Token错误' = 102,
     'error:数据格式化错误' = 200,
     'error:没有对应的检测器' = 201,
     'error:数据校检错误' = 202,

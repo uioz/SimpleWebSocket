@@ -1,10 +1,12 @@
 import { socketPackage } from "../src/socketPackage";
 import * as readline from "readline";
 
+const token = process.argv.splice(2)[0];
+
 let url = 'ws://127.0.0.1:8888';
 let nickName = '二狗子';
 
-let client:socketPackage;
+let client: socketPackage;
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -21,7 +23,7 @@ const rl = readline.createInterface({
 rl.prompt();
 
 function runClient() {
-    const client = new socketPackage(url,'',nickName);
+    const client = new socketPackage(url, token, nickName);
 
     client.on('login', (response) => {
         console.log('login', response);
@@ -47,9 +49,9 @@ function runClient() {
 };
 
 
-rl.question('请输入Url地址例如默认地址 ws://127.0.0.1:8888 直接回车则使用默认地址! ',(answer)=>{
+rl.question('请输入Url地址例如默认地址 ws://127.0.0.1:8888 直接回车则使用默认地址! ', (answer) => {
 
-    if(answer){
+    if (answer) {
         url = answer;
     }
 
@@ -73,11 +75,15 @@ rl.prompt();
 rl.on('line', (line) => {
     switch (line.trim()) {
         case 'connect':
-            rl.question(`请输入昵称,不输入使用默认昵称,当前昵称<${(client as any).nickName}>: \n`, (answer) => {
-                
-                if(answer){
-                    client.connect(answer);
-                }else{
+            rl.question(`输入连接参数 <昵称> string default: <${(client as any).nickName}> <群组名称> true||string default:'' \n`, (answer) => {
+
+                (answer as any) = answer.split(' ');
+
+                if (answer.length == 1) {
+                    client.connect(answer[0]);
+                } else if (answer.length == 2) {
+                    client.connect(answer[0], answer[1]);
+                } else {
                     client.connect();
                 }
 
@@ -86,7 +92,7 @@ rl.on('line', (line) => {
             break;
         case 'send':
             rl.question(`请输入JSON格式的信息,不输入则跳过: \n`, (answer) => {
-                if(answer){
+                if (answer) {
                     (client as any).send(JSON.parse(answer));
                 }
                 rl.prompt();
@@ -94,7 +100,7 @@ rl.on('line', (line) => {
             break;
         case 'broadcast':
             rl.question(`请输入需要广播的信息: \n`, (answer) => {
-                if(answer){
+                if (answer) {
                     client.broadCast(answer)
                 }
                 rl.prompt();

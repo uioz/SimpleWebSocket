@@ -11,14 +11,16 @@ const loginExp = /^[^\s][^\s]{0,9}$/;
 dataCompare.setStandardCompare('login',{
     type:'string',
     nickName:'string',
-    token:'string'
+    token:'string',
+    groupName:'string'
 });
 
 dataCompare.setStandardCompare('message',{
     type:'string',
-    nickName:'string',
     token:'string',
+    nickName:'string',
     auth:'string',
+    groupName:'string',
     message:'string'
 });
 
@@ -29,6 +31,22 @@ dataCompare.setStandardCompare('message',{
 export const paramCheck: routeParamCheckI = {
     login(request: requestLoginType) {
 
+        let groupName = request.groupName;
+
+        if (groupName) {
+
+            if (!hasGroupName(groupName)) {
+
+                return ErrorCode['system:群组不存在'];
+
+            }
+
+        } else {
+
+            request.groupName = getDefaultGroupName();
+
+        }
+
         const compareStateCode = dataCompare.compare('login',request);
 
         if(!compareStateCode){
@@ -36,22 +54,6 @@ export const paramCheck: routeParamCheckI = {
             if (!loginExp.test(request.nickName)) {
 
                 return ErrorCode['login:昵称必须长度在1到10之间的非空白字符串'];
-
-            }
-
-            let groupName = request.groupName;
-
-            if(groupName){
-
-                if(!hasGroupName(groupName)){
-
-                    return ErrorCode['system:群组不存在'];
-
-                }
-
-            }else{
-
-                request.groupName = getDefaultGroupName();
 
             }
 
@@ -97,6 +99,10 @@ export const paramCheck: routeParamCheckI = {
         if (compareStateCode == 1) {
             return ErrorCode['message:类型请求缺少必要参数'];
         } else {
+
+            console.log('error');
+            
+
             return ErrorCode['message:类型请求参数错误'];
         }
 
@@ -152,8 +158,9 @@ function autoFirewall(request: requestLoginType): number | true {
  */
 export function checkAndFormat(ws: webSocket, data: string): standardRequest | false {
 
-    const requestParam = formatUserData(data),
-        requestType = requestParam['type'];
+    const 
+    requestParam = formatUserData(data),
+    requestType = requestParam['type'];
 
     // 数据格式化过滤器
     if (typeof requestParam == 'number') {
@@ -166,7 +173,7 @@ export function checkAndFormat(ws: webSocket, data: string): standardRequest | f
     const ifNotHaveTokenCode = autoFirewall(requestParam)
     if(typeof ifNotHaveTokenCode === 'number'){
         sendErrorMessage(ws,ifNotHaveTokenCode);
-        logError(ErrorCode['error:没有Token'],data);
+        logError(ErrorCode['error:Token错误'],data);
         return false;
     }
 

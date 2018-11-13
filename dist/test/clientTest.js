@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const socketPackage_1 = require("../src/socketPackage");
 const readline = require("readline");
+const token = process.argv.splice(2)[0];
 let url = 'ws://127.0.0.1:8888';
 let nickName = '二狗子';
 let client;
@@ -18,7 +19,7 @@ const rl = readline.createInterface({
 });
 rl.prompt();
 function runClient() {
-    const client = new socketPackage_1.socketPackage(url, '', nickName);
+    const client = new socketPackage_1.socketPackage(url, token, nickName);
     client.on('login', (response) => {
         console.log('login', response);
     });
@@ -53,9 +54,13 @@ rl.prompt();
 rl.on('line', (line) => {
     switch (line.trim()) {
         case 'connect':
-            rl.question(`请输入昵称,不输入使用默认昵称,当前昵称<${client.nickName}>: \n`, (answer) => {
-                if (answer) {
-                    client.connect(answer);
+            rl.question(`输入连接参数 <昵称> string default: <${client.nickName}> <群组名称> true||string default:'' \n`, (answer) => {
+                answer = answer.split(' ');
+                if (answer.length == 1) {
+                    client.connect(answer[0]);
+                }
+                else if (answer.length == 2) {
+                    client.connect(answer[0], answer[1]);
                 }
                 else {
                     client.connect();

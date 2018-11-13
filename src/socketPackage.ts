@@ -44,12 +44,19 @@ export class socketPackage extends SimpleEventEmitter {
      * @param nickName 用户昵称
      * @param token 服务器id
      */
-    private static getLoingRequest(nickName:string,token:string):requestLoginType{
-        return {
+    private static getLoingRequest(nickName:string,token:string,groupName:string):requestLoginType{
+
+        const result: requestLoginType = {
             type: 'login',
             nickName,
             token
         }
+
+        if(groupName){
+            result.groupName = groupName;
+        }
+
+        return result;
     };
 
     /**
@@ -69,7 +76,7 @@ export class socketPackage extends SimpleEventEmitter {
             groupName,
             message
         }
-    }
+    };
 
     /**
      * 保存远程主机的地址
@@ -126,7 +133,7 @@ export class socketPackage extends SimpleEventEmitter {
         this.state.connect = true;
 
         if (!this.state.login) {
-            this.send(socketPackage.getLoingRequest(this.nickName,this.token));
+            this.send(socketPackage.getLoingRequest(this.nickName,this.token,this.groupName));
         }
 
     }
@@ -213,16 +220,16 @@ export class socketPackage extends SimpleEventEmitter {
 
     };
 
-
     /**
      * 调用后连接服务器,如果已经存在连接则彻底断开连接后再次连接
      */
-    public connect(nickName?: string) {
+    public connect(nickName: string = '',groupName: string = '') {
 
-        const openCode = WebSocket.OPEN,
-            connectCode = WebSocket.CONNECTING,
-            closeCode = WebSocket.CLOSING,
-            codeArray = [openCode, connectCode, closeCode];
+        const 
+        openCode = WebSocket.OPEN,
+        connectCode = WebSocket.CONNECTING,
+        closeCode = WebSocket.CLOSING,
+        codeArray = [openCode, connectCode, closeCode];
 
         if (this.webScoket) {
             // 如果处于连接状态则彻底关闭连接并且清空引用
@@ -234,6 +241,10 @@ export class socketPackage extends SimpleEventEmitter {
 
         if (nickName) {
             this.nickName = nickName;
+        }
+
+        if(groupName && typeof groupName == 'string'){
+            this.groupName = groupName;
         }
 
         if (!this.nickName) {
@@ -255,8 +266,10 @@ export class socketPackage extends SimpleEventEmitter {
     public broadCast(message: string): boolean {
 
         if (this.state.login) {
-    
-            this.send(socketPackage.getRequestMessage(message, this.nickName, this.token, this.auth, this.groupName));
+
+            const response = socketPackage.getRequestMessage(message, this.nickName, this.token, this.auth, this.groupName);
+
+            this.send(response);
 
             return true;
         }

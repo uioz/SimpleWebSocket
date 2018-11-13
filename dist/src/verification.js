@@ -8,13 +8,15 @@ const loginExp = /^[^\s][^\s]{0,9}$/;
 dataCompare.setStandardCompare('login', {
     type: 'string',
     nickName: 'string',
-    token: 'string'
+    token: 'string',
+    groupName: 'string'
 });
 dataCompare.setStandardCompare('message', {
     type: 'string',
-    nickName: 'string',
     token: 'string',
+    nickName: 'string',
     auth: 'string',
+    groupName: 'string',
     message: 'string'
 });
 /**
@@ -22,19 +24,19 @@ dataCompare.setStandardCompare('message', {
  */
 exports.paramCheck = {
     login(request) {
+        let groupName = request.groupName;
+        if (groupName) {
+            if (!dataPersistence_1.hasGroupName(groupName)) {
+                return code_1.ErrorCode['system:群组不存在'];
+            }
+        }
+        else {
+            request.groupName = dataPersistence_1.getDefaultGroupName();
+        }
         const compareStateCode = dataCompare.compare('login', request);
         if (!compareStateCode) {
             if (!loginExp.test(request.nickName)) {
                 return code_1.ErrorCode['login:昵称必须长度在1到10之间的非空白字符串'];
-            }
-            let groupName = request.groupName;
-            if (groupName) {
-                if (!dataPersistence_1.hasGroupName(groupName)) {
-                    return code_1.ErrorCode['system:群组不存在'];
-                }
-            }
-            else {
-                request.groupName = dataPersistence_1.getDefaultGroupName();
             }
             if (dataPersistence_1.hasUser(request.groupName, request.nickName)) {
                 return code_1.ErrorCode['login:该昵称已经有人使用'];
@@ -63,6 +65,7 @@ exports.paramCheck = {
             return code_1.ErrorCode['message:类型请求缺少必要参数'];
         }
         else {
+            console.log('error');
             return code_1.ErrorCode['message:类型请求参数错误'];
         }
     }
@@ -116,7 +119,7 @@ function checkAndFormat(ws, data) {
     const ifNotHaveTokenCode = autoFirewall(requestParam);
     if (typeof ifNotHaveTokenCode === 'number') {
         public_1.sendErrorMessage(ws, ifNotHaveTokenCode);
-        public_1.logError(code_1.ErrorCode['error:没有Token'], data);
+        public_1.logError(code_1.ErrorCode['error:Token错误'], data);
         return false;
     }
     // 请求类型过滤器

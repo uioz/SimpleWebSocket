@@ -10,7 +10,7 @@ const userCollection = new Map();
  * 以Group的形式保存用户 键是用户组名称 值是nickName对应的userID组成的Map
  */
 const userGroup = new Map();
-let defaultGroupName = 'defaultName';
+let defaultGroupName = 'defaultGroup';
 function setDefaultGroupName(newName) {
     defaultGroupName = newName;
 }

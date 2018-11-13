@@ -41,7 +41,7 @@ class socketPackage extends simpleEventEmitter_1.SimpleEventEmitter {
         this.openListener = () => {
             this.state.connect = true;
             if (!this.state.login) {
-                this.send(socketPackage.getLoingRequest(this.nickName, this.token));
+                this.send(socketPackage.getLoingRequest(this.nickName, this.token, this.groupName));
             }
         };
         this.closeListener = (event) => {
@@ -84,12 +84,16 @@ class socketPackage extends simpleEventEmitter_1.SimpleEventEmitter {
      * @param nickName 用户昵称
      * @param token 服务器id
      */
-    static getLoingRequest(nickName, token) {
-        return {
+    static getLoingRequest(nickName, token, groupName) {
+        const result = {
             type: 'login',
             nickName,
             token
         };
+        if (groupName) {
+            result.groupName = groupName;
+        }
+        return result;
     }
     ;
     /**
@@ -110,6 +114,7 @@ class socketPackage extends simpleEventEmitter_1.SimpleEventEmitter {
             message
         };
     }
+    ;
     ;
     /**
      * 调用后将对象转为JSON使用websocket.send方法发送
@@ -152,7 +157,7 @@ class socketPackage extends simpleEventEmitter_1.SimpleEventEmitter {
     /**
      * 调用后连接服务器,如果已经存在连接则彻底断开连接后再次连接
      */
-    connect(nickName) {
+    connect(nickName = '', groupName = '') {
         const openCode = WebSocket.OPEN, connectCode = WebSocket.CONNECTING, closeCode = WebSocket.CLOSING, codeArray = [openCode, connectCode, closeCode];
         if (this.webScoket) {
             // 如果处于连接状态则彻底关闭连接并且清空引用
@@ -162,6 +167,9 @@ class socketPackage extends simpleEventEmitter_1.SimpleEventEmitter {
         }
         if (nickName) {
             this.nickName = nickName;
+        }
+        if (groupName && typeof groupName == 'string') {
+            this.groupName = groupName;
         }
         if (!this.nickName) {
             throw new Error('内部没有昵称,可以在connect方法或者新建实例的时候传入');
@@ -178,7 +186,8 @@ class socketPackage extends simpleEventEmitter_1.SimpleEventEmitter {
      */
     broadCast(message) {
         if (this.state.login) {
-            this.send(socketPackage.getRequestMessage(message, this.nickName, this.token, this.auth, this.groupName));
+            const response = socketPackage.getRequestMessage(message, this.nickName, this.token, this.auth, this.groupName);
+            this.send(response);
             return true;
         }
         return false;

@@ -12,7 +12,7 @@ const userCollection: Map<string, WebSocket> = new Map();
  */
 const userGroup: Map<string, Map<string, string>> = new Map();
 
-let defaultGroupName = 'defaultName';
+let defaultGroupName = 'defaultGroup';
 
 export function setDefaultGroupName(newName:string) {
     defaultGroupName = newName;
