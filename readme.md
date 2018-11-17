@@ -98,11 +98,23 @@ npm run client helloworld
        +- test 编译后的js目录
           +- client.js 命令行客户端 npm执行的就是它
     +- src 存放TypeScript的目录  
+    +- static 存放Vue客户端依赖的内容
     +- test  
-       +- client.html 浏览器客户端
+       +- client.html 浏览器客户端 简易版本
        +- clientTest.ts 命令行客户端
+    +- index.html Vue制作的客户端
 ```
 
-## 下一步计划
+## 使用Vue创建的可视化客户端
 
-- 使用Vue提供一个可视化的客户端(但是不使用工程化因为这是一个DEMO)
+一个超简易的Vue可视化客户端,运行index.html就可以使用.
+
+需要注意的是,在连接远程服务器的时候需要修改url,这个位置在`/static/main.js`的最后.
+
+ps:没有使用构建工具.
+
+
+
+
+
+

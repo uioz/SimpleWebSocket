@@ -1,0 +1,175 @@
+/* 去除默认样式 */
+html,body{
+    height: 100%;
+}
+
+html,body,div,input,button{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+#root{
+    background-color: #d6faff;
+    height: 100%;
+    overflow: hidden;
+}
+
+input, button, select, textarea {
+    outline: none;
+    -webkit-appearance: none;
+    border-radius: 0;
+    border:0;
+}
+
+input[type="text"]:focus,input[type="password"]:focus {
+    background: #fff;
+    outline: none;
+}
+
+/* 整体布局 */
+.left-area,.right-area{
+    float: left;
+    height: 100%;
+}
+
+.left-area{
+    width: 20%;
+}
+
+.right-area{
+    width: 80%;
+}
+
+/* 基础Card的样式 */
+.card{
+    margin: 0.5em;
+    padding: 1em;
+    border-radius: 0.4em;
+    background-color: #fff;
+    box-shadow: 0 0 13px -4px #0000006b;
+    transition: all 200ms;
+}
+
+.card:hover{
+    box-shadow: 0px 2px 11px -3px rgba(0, 0, 0, 0.6);
+}
+
+/* 左边的基础样式 */
+
+.notice,.group-menu{
+    overflow: hidden;
+    overflow-y: auto;
+}
+
+.notice {
+    margin: .5em;
+    height: 30%;
+    background-color: rgb(255, 162, 155);
+}
+
+.group-menu{
+    margin: .5em;
+    height: 70%;
+    background-color: #c3f5fc;
+    box-shadow: inset 0 0 6px -2px rgba(0, 0, 0, 0.58);
+}
+
+.group-menu>.card{
+    cursor: pointer;
+}
+
+/* notcie样式 */
+
+/* 右边的样式 */
+
+.chat-list,.control-area{
+    margin: .5em;
+    padding: .5em;
+}
+
+.chat-list{
+    height: 80%;
+    background-color: rgba(255, 255, 255, 0.5411764705882353);
+    overflow: hidden;
+    overflow-y: auto;
+}
+
+.control-area{
+    height: 20%;
+}
+
+/* input的样式 */
+
+.input{
+    width: 100%;
+}
+
+.input>input[type="text"]{
+    display: block;
+    width: 100%;
+    height: 3em;
+    border: 2px solid rgba(0, 0, 0, 0.08);
+    background-color: #fff;
+    transition: all 200ms;
+}
+
+.input>input[type="text"]:active,.input>input[type="text"]:hover,.input>input[type="text"]:focus{
+    border: 2px solid rgba(76, 175, 80, 0.44);
+}
+
+
+
+/* button的默认样式 */
+.button>button{
+    height: 3em;
+    width: 100%;
+    padding: 0 1em;
+    color: #fff;
+    border: 2px solid rgba(255, 255, 255, 0.44);
+    background-color: rgb(255, 162, 154);
+    box-shadow: 0px 0px 0px 0px #00000082;
+    cursor: pointer;
+    transition: all 200ms;
+}
+
+.button>button:hover{
+    background-color: #ff6558;
+}
+
+.button>button:active{
+    box-shadow: 2px 2px 9px -3px #00000082;
+}
+
+/* 输入组的样式 */
+
+.input-group{
+    overflow: hidden;
+}
+.input-group>.input,.input-group>.button{
+    float: left;
+}
+.input-group>.input{
+    width: 80%;
+}
+.input-group>.button{
+    width: 20%;
+}
+
+
+
+/* 聊天列表的样式 */
+
+.chat-item>.card{
+    display: inline-block;
+    cursor: default;
+}
+
+.chat-item.chat-item-left{
+    text-align: left;
+}
+
+.chat-item.chat-item-right{
+    text-align: right;
+}
+

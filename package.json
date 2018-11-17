@@ -14,9 +14,9 @@
   "license": "ISC",
   "dependencies": {
     "ws": "^6.1.0"
+    "vue": "^2.5.17",
   },
   "devDependencies": {
-    "vue": "^2.5.17",
     "socket.io": "^2.1.1",
     "@types/node": "^10.12.2",
     "@types/socket.io": "^2.1.0",

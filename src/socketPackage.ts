@@ -239,7 +239,7 @@ export class socketPackage extends SimpleEventEmitter {
 
         }
 
-        if (nickName) {
+        if (nickName && typeof groupName == 'string') {
             this.nickName = nickName;
         }
 
