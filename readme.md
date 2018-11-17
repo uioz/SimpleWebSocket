@@ -15,6 +15,9 @@
 另外提供了封装好的客户端可以快速的测试和应用:
  - 命令版本
  - 浏览器版本
+ - Vue可视化版本
+
+![Image text](https://github.com/uioz/socketteach/blob/master/static/screenshot.jpg)
 
 提供一以下的基本功能:
  - 切换群组
@@ -26,6 +29,7 @@
    - 错误
    - 消息
    - 关闭
+
 
 ## 安装
 
@@ -86,6 +90,15 @@ npm run client helloworld
 
 你可以利用他来测试在浏览器中工作是否正常.
 
+## 使用Vue创建的可视化客户端
+
+一个超简易的Vue可视化客户端,运行index.html就可以使用.
+
+需要注意的是,在连接远程服务器的时候需要修改url,这个位置在`/static/main.js`的最后.
+
+ps:没有使用构建工具.
+
+
 ## 目录结构
 
 **注意**:只提及一些关键文件
@@ -104,15 +117,6 @@ npm run client helloworld
        +- clientTest.ts 命令行客户端
     +- index.html Vue制作的客户端
 ```
-
-## 使用Vue创建的可视化客户端
-
-一个超简易的Vue可视化客户端,运行index.html就可以使用.
-
-需要注意的是,在连接远程服务器的时候需要修改url,这个位置在`/static/main.js`的最后.
-
-ps:没有使用构建工具.
-
 
 
 
