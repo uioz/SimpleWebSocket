@@ -113,7 +113,7 @@ npm run client helloworld
 
 一个超简易的Vue可视化客户端,运行index.html就可以使用.
 
-需要注意的是,在连接远程服务器的时候需要修改url,该url位置在`/static/main.js`的最后.
+**注意**:该页面隐藏了服务器地址和服务器签名,该参数配置在`/static/main.js`中的最后一行.
 
 ps:没有使用构建工具.
 

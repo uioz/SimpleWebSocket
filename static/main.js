@@ -277,4 +277,5 @@ class socketPackage extends SimpleEventEmitter {
     }
 };
 
+// 参数1 url 参数2 服务器签名
 const client = new socketPackage('ws://127.0.0.1:8888','helloworld');
