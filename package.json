@@ -13,8 +13,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "ws": "^6.1.0"
-    "vue": "^2.5.17",
+    "ws": "^6.1.0",
+    "vue": "^2.5.17"
   },
   "devDependencies": {
     "socket.io": "^2.1.1",

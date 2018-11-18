@@ -14,7 +14,7 @@
 
 另外提供了封装好的客户端可以快速的测试和应用:
  - 命令版本
- - 浏览器版本
+ - 浏览器环境测试版本
  - Vue可视化版本
 
 ![Image text](https://github.com/uioz/socketteach/blob/master/static/screenshot.jpg)
@@ -31,12 +31,31 @@
    - 关闭
 
 
+## 目录结构
+
+**注意**:只提及一些关键文件
+```
++- socketteach  
+    +- dist TypeScript编译后输出的js
+       +- src 编译后的js目录
+          +- server.js 服务器 npm server 执行的就是它
+          +- socketPackage 客户端包装类 所有的客户端依赖他
+       +- test 编译后的js目录
+          +- client.js 命令行客户端 npm client 执行的就是它
+    +- src 存放TypeScript的目录  
+    +- static 存放Vue客户端依赖的内容
+    +- test  
+       +- client.html 浏览器客户端 简易版本
+       +- clientTest.ts 命令行客户端
+    +- index.html Vue制作的客户端
+```
+
 ## 安装
 
 ```
-git clone https://github.com/uioz/socketteach
+git clone https://github.com/uioz/SimpleWebSocket
 
-cd socketteach
+cd SimpleWebSocket
 
 npm install
 ```
@@ -48,7 +67,7 @@ npm install
 npm run server helloworld
 ```
 
-服务器启动的时候可以按照下面的顺序传入参数:
+__服务器启动的时候可以按照下面的顺序传入参数:__
  - 端口号
  - 服务器群组(多个)
  - 服务器签名
@@ -94,29 +113,12 @@ npm run client helloworld
 
 一个超简易的Vue可视化客户端,运行index.html就可以使用.
 
-需要注意的是,在连接远程服务器的时候需要修改url,这个位置在`/static/main.js`的最后.
+需要注意的是,在连接远程服务器的时候需要修改url,该url位置在`/static/main.js`的最后.
 
 ps:没有使用构建工具.
 
 
-## 目录结构
 
-**注意**:只提及一些关键文件
-```
-+- socketteach  
-    +- dist TypeScript编译后输出的js
-       +- src 编译后的js目录
-          +- server.js 服务器 npm执行的就是它
-          +- socketPackage 客户端包装类 客户端依赖他
-       +- test 编译后的js目录
-          +- client.js 命令行客户端 npm执行的就是它
-    +- src 存放TypeScript的目录  
-    +- static 存放Vue客户端依赖的内容
-    +- test  
-       +- client.html 浏览器客户端 简易版本
-       +- clientTest.ts 命令行客户端
-    +- index.html Vue制作的客户端
-```
 
 
 
